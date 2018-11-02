@@ -1,0 +1,50 @@
+<h1>Redis</h1>
+<div class="tracy-inner">
+	<div class="tracy-inner-container">
+		<?php $i = 1; $c = count($connections); ?>
+		<?php foreach ($connections as $connection): ?>
+			<table>
+				<tr>
+					<th>Connected:</th>
+					<td>
+						<?php if ($connection['client']->isConnected()) : ?>
+							<strong>Yes</strong>
+						<?php else: ?>
+							<strong style="color: darkred;">No</strong>
+							<img
+								src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABY0lEQVQ4T6XUPUgWUBTG8Z+ohO46iBKY6KDiJAQZlFgiIhiCSRAWBhEVBdEQTg4K1tDgqiiIOCgITeIi6NAQZDikoBCJEITQx9AQDXHgjr6veN87n+d/z+E8zylT/A1jLJWUoQbvMIm/p0mjqNCrw3t04jtu4Qf6sY+58wIrcYiLSfgIPxFdL2H1vMCoP0Ij/qEPTbiBN9jOAcbId/AFg6jGKJ7gIAe4jFl8TKD4IEZtxe8c4BS+YgHNqduetKhTl1lsyyF4gBa8wkts4TWuFLLGWcBreI7buItyDOFmLrAe62hL241uuzCSC4wJTlCLaRyjAS9ygaHbSWbuRXtKydtSgItYSTaJxYSN1koBPsP1FMFITBj7cynAKlzFhZTtvWIH6izbhLYCA7iEXWyUAgzfbabzFaB7mEFEMisp4blIySeM4zIe4n4usAPzCfIhHdluPM0Fhm4iRe0PfuExvhUC/gfifEIVhq4UvgAAAABJRU5ErkJggg=="/>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<th>Name:</th>
+					<td><?= $connection['name'] ?></td>
+				</tr>
+				<tr>
+					<th>Ping:</th>
+					<td><?= $connection['ping'] ?> (<?= number_format($connection['duration'], 4) ?> ms)</td>
+				</tr>
+				<tr>
+					<th>DB size:</th>
+					<td><?= $connection['dbSize'] ?> keys</td>
+				</tr>
+				<tr>
+					<th>Server:</th>
+					<td><?= $connection['uri'] ?></td>
+				</tr>
+				<tr>
+					<th>Connection options:</th>
+					<td>
+						<?php foreach ($connection['options'] as $key => $val): ?>
+							<?= $key ?>: <strong><?= $val ?></strong><br/>
+						<?php endforeach; ?>
+					</td>
+				</tr>
+			</table>
+			<?php if($c > $i): ?>
+				<br>
+			<?php endif; ?>
+			<?php $i++; ?>
+		<?php endforeach; ?>
+	</div>
+</div>
