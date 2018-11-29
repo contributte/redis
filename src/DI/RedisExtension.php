@@ -50,7 +50,7 @@ final class RedisExtension extends CompilerExtension
 		foreach ($config['connection'] as $name => $connection) {
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
-			$client = $builder->addDefinition($this->prefix('connection' . $name . '.client'))
+			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
 				->setType(Client::class)
 				->setArguments([$connection['uri'], $connection['options']]);
 
@@ -143,7 +143,7 @@ final class RedisExtension extends CompilerExtension
 
 			$sessionHandler = $builder->addDefinition($this->prefix('connection.' . $name . 'sessionHandler'))
 				->setType(Handler::class)
-				->setArguments([$this->prefix('@client'), ['gc_maxlifetime' => $sessionConfig['ttl']]]);
+				->setArguments([$this->prefix('@connection.' . $name . '.client'), ['gc_maxlifetime' => $sessionConfig['ttl']]]);
 
 			$builder->getDefinitionByType(Session::class)
 				->addSetup('setHandler', [$sessionHandler]);
