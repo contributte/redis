@@ -30,15 +30,11 @@
 				</tr>
 				<tr>
 					<th>Server:</th>
-					<td><?= $connection['uri'] ?></td>
+					<td><code><?= $connection['uri'] ?></code></td>
 				</tr>
 				<tr>
 					<th>Connection options:</th>
-					<td>
-						<?php foreach ($connection['options'] as $key => $val): ?>
-							<?= $key ?>: <strong><?= $val ?></strong><br/>
-						<?php endforeach; ?>
-					</td>
+					<td><?php dump($connection['options']); ?></td>
 				</tr>
 			</table>
 			<?php if($c > $i): ?>
