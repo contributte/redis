@@ -24,7 +24,11 @@
     "ninjify/qa": "^0.8.0",
     "phpunit/phpunit": "^7.4.3",
     "nette/http": "~2.4.10",
-    "nette/caching": "~2.5.8"
+    "nette/caching": "~2.5.8",
+    "phpstan/phpstan-shim": "^0.11",
+    "phpstan/phpstan-deprecation-rules": "^0.11",
+    "phpstan/phpstan-nette": "^0.11",
+    "phpstan/phpstan-strict-rules": "^0.11"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -49,15 +53,8 @@
     "coverage": [
       "phpdbg -qrr vendor/bin/phpunit tests --colors=always -c tests/coverage.xml"
     ],
-    "phpstan-install": [
-      "mkdir -p temp/phpstan",
-      "composer require -d temp/phpstan phpstan/phpstan:^0.10",
-      "composer require -d temp/phpstan phpstan/phpstan-deprecation-rules:^0.10",
-      "composer require -d temp/phpstan phpstan/phpstan-nette:^0.10",
-      "composer require -d temp/phpstan phpstan/phpstan-strict-rules:^0.10"
-    ],
     "phpstan": [
-      "temp/phpstan/vendor/bin/phpstan analyse -l max -c phpstan.neon src"
+      "vendor/bin/phpstan analyse -l max -c phpstan.neon src"
     ]
   },
   "extra": {
