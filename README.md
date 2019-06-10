@@ -1,8 +1,6 @@
-# Redis
+# Contributte Redis
 
 [Predis](https://github.com/nrk/predis) integration into [Nette/DI](https://github.com/nette/di)
-
------
 
 [![Build Status](https://img.shields.io/travis/contributte/redis.svg?style=flat-square)](https://travis-ci.org/contributte/redis)
 [![Code coverage](https://img.shields.io/coveralls/contributte/redis.svg?style=flat-square)](https://coveralls.io/r/contributte/redis)
@@ -16,11 +14,10 @@
 
 [![Join the chat](https://img.shields.io/gitter/room/contributte/contributte.svg?style=flat-square)](http://bit.ly/ctteg)
 
-## Install
+## Documentation
 
-```
-composer require contributte/redis
-```
+- [Setup](.docs/README.md#setup)
+- [Configuration](.docs/README.md#setup)
 
 ## Versions
 
@@ -28,11 +25,6 @@ composer require contributte/redis
 |-------------|---------|----------|----------|
 | dev         | `^0.2`  | `master` | `>= 7.1` |
 | stable      | `^0.1`  | `master` | `>= 7.1` |
-
-## Overview
-
-- [Usage - how to register](/.docs/README.md#usage)
-- [Configuration - how to configure](/.docs/README.md#configuration)
 
 ## Maintainers
 
@@ -56,7 +48,5 @@ composer require contributte/redis
     </tr>
   </tbody>
 </table>
-
------
 
 Thank you for testing, reporting and contributing.

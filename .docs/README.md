@@ -1,13 +1,17 @@
-# Redis
+# Contributte Redis
 
 [Predis](https://github.com/nrk/predis) integration into [Nette/DI](https://github.com/nette/di)
 
 ## Content
 
-- [Usage - how to register](#usage)
-- [Configuration - how to configure](#configuration)
+- [Setup](#setup)
+- [Configuration](#setup)
 
-## Usage
+## Setup
+
+```bash
+composer require contributte/redis
+```
 
 ```yaml
 extensions:
