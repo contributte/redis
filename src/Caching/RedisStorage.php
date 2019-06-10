@@ -29,7 +29,7 @@ final class RedisStorage implements IStorage
 	 */
 	public function write(string $key, $data, array $dependencies): void
 	{
-		$this->client->set($key, json_encode($data));
+		$this->client->set($key, $data);
 
 		if (isset($dependencies[Cache::EXPIRATION])) {
 			$expiration = (int) $dependencies[Cache::EXPIRATION];
@@ -51,7 +51,7 @@ final class RedisStorage implements IStorage
 		$val = $this->client->get($key);
 
 		try {
-			return json_decode($val);
+			return $val;
 		} catch (Throwable $e) {
 			return null;
 		}
