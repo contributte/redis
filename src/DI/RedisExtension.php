@@ -58,8 +58,8 @@ final class RedisExtension extends CompilerExtension
 			$connections[] = [
 				'name' => $name,
 				'client' => $client,
-				'uri' => $connection['uri'],
-				'options' => $connection['options'],
+				'uri' => $connection->uri,
+				'options' => $connection->options,
 			];
 		}
 
