@@ -17,20 +17,20 @@
   ],
   "require": {
     "php": "^7.2",
-    "nette/di": "~3.0.0",
-    "predis/predis": "^1.1.1",
-    "tracy/tracy": "~2.6.0"
+    "nette/di": "~3.0.1",
+    "predis/predis": "^1.1.1"
   },
   "require-dev": {
     "nette/caching": "~3.0.0",
     "nette/http": "~3.0.1",
-    "ninjify/qa": "^0.8.0",
+    "ninjify/qa": "^0.10.0",
     "phpstan/extension-installer": "^1.0",
     "phpstan/phpstan-deprecation-rules": "^0.11",
     "phpstan/phpstan-nette": "^0.11",
     "phpstan/phpstan-shim": "^0.11",
     "phpstan/phpstan-strict-rules": "^0.11",
-    "phpunit/phpunit": "^8.2.1"
+    "phpunit/phpunit": "^8.2.1",
+    "tracy/tracy": "~2.7.0"
   },
   "autoload": {
     "psr-4": {
