@@ -1,23 +1,40 @@
-# Contributte Redis
+![Contributte Redis](https://heatbadger.now.sh/github/readme/contributte/redis/)
 
-[Predis](https://github.com/nrk/predis) integration into [Nette/DI](https://github.com/nette/di)
+<p align=center>
+  <a href="https://github.com/contributte/redis/actions">
+    <img src="https://badgen.net/github/checks/contributte/redis/master?cache=300">
+  </a>
+  <a href="https://coveralls.io/r/contributte/redis">
+    <img src="https://badgen.net/coveralls/c/github/contributte/redis?cache=300">
+  </a>
+  <a href="https://packagist.org/packages/contributte/redis">
+    <img src="https://badgen.net/packagist/dm/contributte/redis">
+  </a>
+  <a href="https://packagist.org/packages/contributte/redis">
+    <img src="https://badgen.net/packagist/v/contributte/redis">
+  </a>
+  <a href="http://bit.ly/ctteg">
+    <img src="https://badgen.net/badge/chat/gitter/cyan">
+  </a>
+  <a href="https://contributte.org/partners.html">
+    <img src="https://badgen.net/badge/become/a%20patron/F96854">
+  </a>
+<p>
 
-[![Build Status](https://img.shields.io/travis/contributte/redis.svg?style=flat-square)](https://travis-ci.org/contributte/redis)
-[![Code coverage](https://img.shields.io/coveralls/contributte/redis.svg?style=flat-square)](https://coveralls.io/r/contributte/redis)
-[![Licence](https://img.shields.io/packagist/l/contributte/redis.svg?style=flat-square)](https://packagist.org/packages/contributte/redis)
-[![Downloads this Month](https://img.shields.io/packagist/dm/contributte/redis.svg?style=flat-square)](https://packagist.org/packages/contributte/redis)
-[![Downloads total](https://img.shields.io/packagist/dt/contributte/redis.svg?style=flat-square)](https://packagist.org/packages/contributte/redis)
-[![Latest stable](https://img.shields.io/packagist/v/contributte/redis.svg?style=flat-square)](https://packagist.org/packages/contributte/redis)
-[![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat-square)](https://github.com/phpstan/phpstan)
+<p align=center>
+Website 🚀 <a href="https://contributte.org">contributte.org</a> | Contact 👨🏻‍💻 <a href="https://f3l1x.io">f3l1x.io</a> | Twitter 🐦 <a href="https://twitter.com/contributte">@contributte</a>
+</p>
 
-## Discussion / Help
+## Usage
 
-[![Join the chat](https://img.shields.io/gitter/room/contributte/contributte.svg?style=flat-square)](http://bit.ly/ctteg)
+To install the latest version of `contributte/redis` use [Composer](https://getcomposer.com).
 
+```
+composer require contributte/redis
+```
 ## Documentation
 
-- [Setup](.docs/README.md#setup)
-- [Configuration](.docs/README.md#setup)
+For details on how to use this package, check out our [documentation](.docs).
 
 ## Versions
 
@@ -27,20 +44,17 @@
 | stable      | `^0.2`  | `master` | 3.0+  | `^7.2`  |
 | stable      | `^0.1`  | `master` | 2.4   | `>=7.1` |
 
-## Maintainers
+## Development
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://github.com/f3l1x">
-            <img width="150" height="150" src="https://avatars2.githubusercontent.com/u/538058?v=3&s=150">
-        </a>
-        </br>
-        <a href="https://github.com/f3l1x">Milan Felix Šulc</a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+See [how to contribute](https://contributte.org/contributing.html) to this package.
 
-Thank you for testing, reporting and contributing.
+This package is currently maintaining by these authors.
+
+<a href="https://github.com/f3l1x">
+  <img width="80" height="80" src="https://avatars2.githubusercontent.com/u/538058?v=3&s=80">
+</a>
+
+-----
+
+Consider to [support](https://contributte.org/partners.html) **contributte** development team.
+Also thank you for using this package.
