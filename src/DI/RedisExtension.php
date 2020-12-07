@@ -28,7 +28,7 @@ final class RedisExtension extends CompilerExtension
 		return Expect::structure([
 			'debug' => Expect::bool(false),
 			'connection' => Expect::arrayOf(Expect::structure([
-				'uri' => Expect::string('tcp://127.0.0.1:6379'),
+				'uri' => Expect::anyOf(Expect::string(), Expect::listOf(Expect::string()))->default('tcp://127.0.0.1:6379'),
 				'options' => Expect::array(),
 				'storage' => Expect::bool(false),
 				'sessions' => Expect::anyOf(
