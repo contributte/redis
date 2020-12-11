@@ -30,7 +30,14 @@
 				</tr>
 				<tr>
 					<th>Server:</th>
-					<td><code><?= $connection['uri'] ?></code></td>
+					<td>
+						<?php if (is_array($connection['uri'])):
+							dump($connection['uri']);
+						else:
+						?>
+						<code><?= $connection['uri'] ?></code>
+						<?php endif; ?>
+					</td>
 				</tr>
 				<tr>
 					<th>Connection options:</th>
