@@ -12,7 +12,7 @@ use Tester\Assert;
 require_once __DIR__ . '/../bootstrap.php';
 
 test(function (): void {
-	$storage = (object) [];
+	$storage = (object) ['unserialized' => 'unserialized'];
 
 	$conn = Mockery::mock(ConnectionInterface::class)
 		->shouldReceive('executeCommand')
@@ -36,4 +36,8 @@ test(function (): void {
 	Assert::same('bat', $redis->read('foo'));
 	$redis->remove('foo');
 	Assert::null($redis->read('foo'));
+	Assert::null($redis->read('unserialized'));
+
+	$redis->write('false', false, []);
+	Assert::false($redis->read('false'));
 });

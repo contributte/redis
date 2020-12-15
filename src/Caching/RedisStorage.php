@@ -5,7 +5,6 @@ namespace Contributte\Redis\Caching;
 use Nette\Caching\Cache;
 use Nette\Caching\IStorage;
 use Predis\Client;
-use Throwable;
 
 final class RedisStorage implements IStorage
 {
@@ -29,12 +28,12 @@ final class RedisStorage implements IStorage
 	 */
 	public function write(string $key, $data, array $dependencies): void
 	{
-		$this->client->set($key, $data);
+		$this->client->set($key, serialize($data));
 
 		if (isset($dependencies[Cache::EXPIRATION])) {
 			$expiration = (int) $dependencies[Cache::EXPIRATION];
 
-			if ($dependencies[Cache::SLIDING] !== true) {
+			if (!isset($dependencies[Cache::SLIDING]) || $dependencies[Cache::SLIDING] !== true) {
 				$this->client->expireat($key, time() + $expiration);
 			} else {
 				$this->client->expire($key, $expiration);
@@ -44,17 +43,22 @@ final class RedisStorage implements IStorage
 
 	/**
 	 * @return mixed
-	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 */
 	public function read(string $key)
 	{
-		$val = $this->client->get($key);
+		$serializedValue = $this->client->get($key);
 
-		try {
-			return $val;
-		} catch (Throwable $e) {
+		if ($serializedValue === null) {
 			return null;
 		}
+
+		if ($serializedValue === 'b:0;') {
+			return false;
+		}
+
+		$value = @unserialize($serializedValue);
+
+		return $value === false ? null : $value;
 	}
 
 	public function lock(string $key): void
