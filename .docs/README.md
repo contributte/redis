@@ -59,3 +59,21 @@ redis:
         default:
             storage: false
 ```
+
+### Sessions and cache
+
+When using sessions and cache make sure you use **2 different databases**. One for cache and one for sessions. In case you will use only 1 database for both **you will loose sessions when clearing cache.**
+This would be preferred config:
+```yaml
+   connection:
+        default:
+            uri: tcp://127.0.0.1:6379
+            sessions: false
+            storage: true
+            options: ['parameters': ['database': 0]
+        session:
+            uri: tcp://127.0.0.1:6379
+            sessions: true
+            storage: false
+            options: ['parameters': ['database': 1]]
+```
