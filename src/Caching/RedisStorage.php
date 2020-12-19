@@ -76,7 +76,7 @@ final class RedisStorage implements IStorage
 	 */
 	public function clean(array $conditions): void
 	{
-		$this->client->flushall();
+		$this->client->flushdb();
 	}
 
 }
