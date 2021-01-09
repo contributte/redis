@@ -9,14 +9,20 @@ use Predis\Client;
 final class RedisStorage implements IStorage
 {
 
-	/** @var Client */
+	/** @var Client<mixed> */
 	private $client;
 
+	/**
+	 * @param Client<mixed> $client
+	 */
 	public function __construct(Client $client)
 	{
 		$this->client = $client;
 	}
 
+	/**
+	 * @return Client<mixed>
+	 */
 	public function getClient(): Client
 	{
 		return $this->client;
