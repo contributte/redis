@@ -7,7 +7,7 @@
     "predis"
   ],
   "type": "library",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "homepage": "https://github.com/contributte/redis",
   "authors": [
     {
