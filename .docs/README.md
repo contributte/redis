@@ -70,7 +70,7 @@ This would be preferred config:
             uri: tcp://127.0.0.1:6379
             sessions: false
             storage: true
-            options: ['parameters': ['database': 0]
+            options: ['parameters': ['database': 0]]
         session:
             uri: tcp://127.0.0.1:6379
             sessions: true
