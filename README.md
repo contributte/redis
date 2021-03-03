@@ -20,10 +20,10 @@
 
 ## Usage
 
-To install the latest version of `contributte/redis` use [Composer](https://getcomposer.com).
+To install the latest version of `contributte/redis` use [Composer](https://getcomposer.org).
 
 ```
-composer require contributte/redis
+$ composer require contributte/redis
 ```
 ## Documentation
 
