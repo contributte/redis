@@ -22,7 +22,7 @@
 
 To install the latest version of `contributte/redis` use [Composer](https://getcomposer.com).
 
-```
+```bash
 composer require contributte/redis
 ```
 ## Documentation
