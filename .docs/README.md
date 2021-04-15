@@ -46,7 +46,7 @@ redis:
 
 			## you can also configure session
 			sessions:
-				ttl: null # time after which is session invalidated
+				ttl: 3600 # time in seconds after which is session invalidated
 ```
 
 ### Cache
