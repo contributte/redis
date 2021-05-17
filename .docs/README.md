@@ -77,3 +77,18 @@ connection:
 		storage: false
 		options: ['parameters': ['database': 1]]
 ```
+
+### Providing configuration from ENV variables
+
+In the need of passing down ENV variables to the configuration you can use `::getenv` on
+`uri` and `debug` parameters, for example:
+
+```neon
+redis:
+	debug: ::getenv('REDIS_DEBUG_MODE')
+	connection:
+		default:
+			uri: ::getenv('REDIS_SERVER_URI')
+```
+
+For `debug` parameter values `true` or `0` (BASH true) will enable the debugging.

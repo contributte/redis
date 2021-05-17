@@ -8,6 +8,8 @@ use Contributte\Redis\Tracy\RedisPanel;
 use Nette\Caching\IStorage;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\ServiceDefinition;
+use Nette\DI\Definitions\Statement;
+use Nette\DI\PhpGenerator;
 use Nette\Http\Session;
 use Nette\PhpGenerator\ClassType;
 use Nette\Schema\Expect;
@@ -26,9 +28,9 @@ final class RedisExtension extends CompilerExtension
 	public function getConfigSchema(): Schema
 	{
 		return Expect::structure([
-			'debug' => Expect::bool(false),
+			'debug' => Expect::bool(false)->dynamic(),
 			'connection' => Expect::arrayOf(Expect::structure([
-				'uri' => Expect::anyOf(Expect::string(), Expect::listOf(Expect::string()))->default('tcp://127.0.0.1:6379'),
+				'uri' => Expect::anyOf(Expect::string(), Expect::listOf(Expect::string()))->default('tcp://127.0.0.1:6379')->dynamic(),
 				'options' => Expect::array(),
 				'storage' => Expect::bool(false),
 				'sessions' => Expect::anyOf(
@@ -150,9 +152,20 @@ final class RedisExtension extends CompilerExtension
 	{
 		$config = $this->config;
 
+		// Add panel to tracy bar only if debug is allowed
 		if ($config->debug && $config->connection !== []) {
-			$initialize = $class->getMethod('initialize');
-			$initialize->addBody('$this->getService(?)->addPanel($this->getService(?));', ['tracy.bar', $this->prefix('panel')]);
+			$generator = new PhpGenerator($this->getContainerBuilder());
+			$this->initialization->addBody($generator->formatPhp('?;', [
+				new Statement(
+					'if (strtolower(?) === "true" || ? === "0") { $this->getService(?)->addPanel($this->getService(?)); }'
+					, [
+						$config->debug,
+						$config->debug,
+						'tracy.bar',
+						$this->prefix('panel')
+					]
+				),
+			]));
 		}
 	}
 
