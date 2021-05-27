@@ -157,12 +157,12 @@ final class RedisExtension extends CompilerExtension
 			$generator = new PhpGenerator($this->getContainerBuilder());
 			$this->initialization->addBody($generator->formatPhp('?;', [
 				new Statement(
-					'if (strtolower(?) === "true" || ? === "0") { $this->getService(?)->addPanel($this->getService(?)); }'
-					, [
+					'if (strtolower(?) === "true" || ? === "0") { $this->getService(?)->addPanel($this->getService(?)); }',
+					[
 						$config->debug,
 						$config->debug,
 						'tracy.bar',
-						$this->prefix('panel')
+						$this->prefix('panel'),
 					]
 				),
 			]));

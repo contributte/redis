@@ -16,7 +16,7 @@ test(function (): void {
 	putenv('RD_URI=tcp://foo.bar.example:6379');
 
 	$extension = new RedisExtension();
-	$loader = new Loader;
+	$loader = new Loader();
 	$config = $loader->load(FileMock::create('
 	debug: ::getenv("RD_DEBUG")
 	connection:

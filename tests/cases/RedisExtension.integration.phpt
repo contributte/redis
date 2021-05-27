@@ -27,9 +27,10 @@ function createContainer($source, $config = null, array $params = []): ?Containe
 
 	} elseif ($source instanceof Compiler) {
 		if (is_string($config)) {
-			$loader = new Loader;
+			$loader = new Loader();
 			$config = $loader->load(is_file($config) ? $config : FileMock::create($config, 'neon'));
 		}
+
 		$code = $source->addConfig((array) $config)
 			->setClassName($class)
 			->compile();
@@ -37,7 +38,7 @@ function createContainer($source, $config = null, array $params = []): ?Containe
 		return null;
 	}
 
-	file_put_contents(__DIR__ . '/../tmp/code.php', "<?php\n\n$code");
+	file_put_contents(__DIR__ . '/../tmp/code.php', "<?php\n\n" . $code);
 	require __DIR__ . '/../tmp/code.php';
 	return new $class($params);
 }
@@ -47,10 +48,9 @@ test(function (): void {
 	putenv('RD_DEBUG=1');
 	putenv('RD_URI=tcp://foo.bar.example:6379s');
 
-
-	$compiler = new Compiler;
+	$compiler = new Compiler();
 	$compiler->addExtension('tracy', new TracyExtension());
-	$compiler->addExtension('extensions', new ExtensionsExtension);
+	$compiler->addExtension('extensions', new ExtensionsExtension());
 	$container = createContainer($compiler, '
 services:
 - \Nette\Caching\Storages\DevNullStorage
@@ -98,7 +98,11 @@ redis:
 		$client->connect();
 		Assert::fail('Connect is expected to fail');
 	} catch (ConnectionException $e) {
-		Assert::equal('php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known [tcp://foo.bar.example:6379]', $e->getMessage());
+		$expectedFailureMessages = [
+			'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known [tcp://foo.bar.example:6379]',
+			'php_network_getaddresses: getaddrinfo failed: Name or service not known [tcp://foo.bar.example:6379]',
+		];
+		Assert::contains($e->getMessage(), $expectedFailureMessages, 'Failure message should have one of expected wordings.');
 	} finally {
 		putenv('RD_DEBUG=');
 		putenv('RD_URI=');
@@ -109,10 +113,9 @@ test(function (): void {
 	putenv('RD_DEBUG=0');
 	putenv('RD_URI=tcp://foo.bar.example:6379s');
 
-
-	$compiler = new Compiler;
+	$compiler = new Compiler();
 	$compiler->addExtension('tracy', new TracyExtension());
-	$compiler->addExtension('extensions', new ExtensionsExtension);
+	$compiler->addExtension('extensions', new ExtensionsExtension());
 	$container = createContainer($compiler, '
 services:
 - \Nette\Caching\Storages\DevNullStorage

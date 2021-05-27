@@ -12,7 +12,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 test(function (): void {
 	$extension = new RedisExtension();
-	$loader = new Loader;
+	$loader = new Loader();
 	$config = $loader->load(FileMock::create('
 	debug: false
 	connection:
