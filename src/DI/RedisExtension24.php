@@ -6,53 +6,56 @@ use Contributte\Redis\Caching\RedisJournal;
 use Contributte\Redis\Caching\RedisStorage;
 use Contributte\Redis\Exception\Logic\InvalidStateException;
 use Contributte\Redis\Tracy\RedisPanel;
-use Nette\Caching\Storage;
+use Nette\Caching\IStorage;
 use Nette\DI\CompilerExtension;
-use Nette\DI\Definitions\ServiceDefinition;
 use Nette\Http\Session;
 use Nette\PhpGenerator\ClassType;
-use Nette\Schema\Expect;
-use Nette\Schema\Schema;
+use Nette\Utils\Validators;
 use Predis\Client;
 use Predis\Session\Handler;
 use RuntimeException;
-use stdClass;
 
-/**
- * @property-read stdClass $config
- */
-final class RedisExtension extends CompilerExtension
+final class RedisExtension24 extends CompilerExtension
 {
 
-	public function getConfigSchema(): Schema
-	{
-		return Expect::structure([
-			'debug' => Expect::bool(false),
-			'connection' => Expect::arrayOf(Expect::structure([
-				'uri' => Expect::anyOf(Expect::string(), Expect::listOf(Expect::string()))->default('tcp://127.0.0.1:6379'),
-				'options' => Expect::array(),
-				'storage' => Expect::bool(false),
-				'sessions' => Expect::anyOf(
-					Expect::bool(),
-					Expect::array()
-				)->default(false),
-			])),
-		]);
-	}
+	/** @var mixed[] */
+	private $defaults = [
+		'debug' => false,
+		'connection' => [],
+	];
+
+	/** @var mixed[] */
+	private $connectionDefaults = [
+		'uri' => 'tcp://127.0.0.1:6379',
+		'options' => [],
+		'storage' => false,
+		'sessions' => false,
+	];
+
+	/** @var mixed[] */
+	private $sessionDefaults = [
+		'ttl' => null,
+	];
 
 	public function loadConfiguration(): void
 	{
 		$builder = $this->getContainerBuilder();
-		$config = $this->config;
+		$config = $this->validateConfig($this->defaults);
+
+		if (!isset($config['connection']['default'])) {
+			throw new InvalidStateException(sprintf('%s.connection.default is required.', $this->name));
+		}
 
 		$connections = [];
 
 		$builder->addDefinition($this->prefix('journal'))->setType(RedisJournal::class);
 
-		foreach ($config->connection as $name => $connection) {
+		foreach ($config['connection'] as $name => $connection) {
+			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
+
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
 				->setType(Client::class)
-				->setArguments([$connection->uri, $connection->options]);
+				->setArguments([$connection['uri'], $connection['options']]);
 
 			if ($name !== 'default') {
 				$client->setAutowired(false);
@@ -61,12 +64,12 @@ final class RedisExtension extends CompilerExtension
 			$connections[] = [
 				'name' => $name,
 				'client' => $client,
-				'uri' => $connection->uri,
-				'options' => $connection->options,
+				'uri' => $connection['uri'],
+				'options' => $connection['options'],
 			];
 		}
 
-		if ($config->debug && $config->connection !== []) {
+		if ($config['debug'] === true) {
 			$builder->addDefinition($this->prefix('panel'))
 				->setFactory(RedisPanel::class, [$connections]);
 		}
@@ -81,39 +84,40 @@ final class RedisExtension extends CompilerExtension
 	public function beforeCompileStorage(): void
 	{
 		$builder = $this->getContainerBuilder();
-		$config = $this->config;
+		$config = $this->validateConfig($this->defaults);
 
-		foreach ($config->connection as $name => $connection) {
+		foreach ($config['connection'] as $name => $connection) {
+			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
+
 			// Skip if replacing storage is disabled
-			if (!$connection->storage) {
-				continue;
-			}
+			if ($connection['storage'] === false) continue;
 
 			// Validate needed services
-			if ($builder->getByType(Storage::class) === null) {
-				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', Storage::class));
+			if ($builder->getByType(IStorage::class) === null) {
+				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', IStorage::class));
 			}
 
-			$builder->getDefinitionByType(Storage::class)
+			$builder->getDefinitionByType(IStorage::class)
 				->setAutowired(false);
 
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
-				->setFactory(RedisStorage::class);
+				->setFactory(RedisStorage::class)
+				->setAutowired(true);
 		}
 	}
 
 	public function beforeCompileSession(): void
 	{
 		$builder = $this->getContainerBuilder();
-		$config = $this->config;
+		$config = $this->validateConfig($this->defaults);
 
 		$sessionHandlingConnection = null;
 
-		foreach ($config->connection as $name => $connection) {
+		foreach ($config['connection'] as $name => $connection) {
+			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
+
 			// Skip if replacing session is disabled
-			if ($connection->sessions === false) {
-				continue;
-			}
+			if ($connection['sessions'] === false) continue;
 
 			if ($sessionHandlingConnection === null) {
 				$sessionHandlingConnection = $name;
@@ -125,35 +129,35 @@ final class RedisExtension extends CompilerExtension
 				));
 			}
 
+			// Validate given config
+			Validators::assert($connection['sessions'], 'bool|array');
+
 			// Validate needed services
 			if ($builder->getByType(Session::class) === null) {
 				throw new RuntimeException(sprintf('Please install nette/http package. %s is required', Session::class));
 			}
 
 			// Validate session config
-			if ($connection->sessions === true) {
-				$sessionConfig = [
-					'ttl' => null,
-				];
+			if ($connection['sessions'] === true) {
+				$sessionConfig = $this->sessionDefaults;
 			} else {
-				$sessionConfig = (array) $connection->sessions;
+				$sessionConfig = $this->validateConfig($this->sessionDefaults, $connection['sessions'], $this->prefix('connection.' . $name . 'sessions'));
 			}
 
 			$sessionHandler = $builder->addDefinition($this->prefix('connection.' . $name . 'sessionHandler'))
 				->setType(Handler::class)
-				->setArguments([$this->prefix('@connection.' . $name . '.client'), ['gc_maxlifetime' => $sessionConfig['ttl'] ?? null]]);
+				->setArguments([$this->prefix('@connection.' . $name . '.client'), ['gc_maxlifetime' => $sessionConfig['ttl']]]);
 
-			$session = $builder->getDefinitionByType(Session::class);
-			assert($session instanceof ServiceDefinition);
-			$session->addSetup('setHandler', [$sessionHandler]);
+			$builder->getDefinitionByType(Session::class)
+				->addSetup('setHandler', [$sessionHandler]);
 		}
 	}
 
 	public function afterCompile(ClassType $class): void
 	{
-		$config = $this->config;
+		$config = $this->validateConfig($this->defaults);
 
-		if ($config->debug && $config->connection !== []) {
+		if ($config['debug'] === true) {
 			$initialize = $class->getMethod('initialize');
 			$initialize->addBody('$this->getService(?)->addPanel($this->getService(?));', ['tracy.bar', $this->prefix('panel')]);
 		}
