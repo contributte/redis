@@ -5,3 +5,5 @@ includes:
 parameters:
 	excludePaths:
 		- src/DI/RedisExtension24.php
+	bootstrapFiles:
+			- phpstan.php

@@ -2,13 +2,13 @@
 
 namespace Contributte\Redis\Caching;
 
+use Contributte\Redis\Exception\LogicalException;
 use Nette\Caching\Cache;
-use Nette\Caching\Storage;
-use Nette\Caching\Storages\Journal;
+use Nette\Caching\IStorage as Storage;
+use Nette\Caching\Storages\IJournal as Journal;
 use Nette\InvalidStateException;
 use Predis\Client;
 use Predis\PredisException;
-use PredisPredisException;
 use function array_map;
 use function explode;
 use function is_string;
@@ -32,16 +32,22 @@ final class RedisStorage implements Storage
 	private const META_ITEMS = 'di'; // array of dependent items (file => timestamp)
 	private const META_CALLBACKS = 'callbacks'; // array of callbacks (function, args)
 
+	private const SERIALIZE_PHP = 1;
+	private const SERIALIZE_IGBINARY = 2;
+
 	/**
 	 * additional cache structure
 	 */
 	private const KEY = 'key';
 
-	/** @var Client<mixed> */
+	/** @var bool $igbinary */
+	private static $igbinary;
+
+	/** @var Client<mixed> $client */
 	private $client;
 
-	/** @var Journal|null */
-	private $journal = null;
+	/** @var Journal|null $journal */
+	private $journal;
 
 	/**
 	 * @param Client<mixed> $client
@@ -51,6 +57,7 @@ final class RedisStorage implements Storage
 	{
 		$this->client = $client;
 		$this->journal = $journal;
+		self::$igbinary = extension_loaded('igbinary');
 	}
 
 	/**
@@ -68,7 +75,7 @@ final class RedisStorage implements Storage
 	 * @return mixed|null
 	 * @throws PredisException
 	 */
-	public function read(string $key)
+	public function read($key)
 	{
 		$stored = $this->doRead($key);
 		if (!$stored || !$this->verify($stored[0])) {
@@ -93,6 +100,10 @@ final class RedisStorage implements Storage
 		return self::processStoredValue($key, $stored);
 	}
 
+	/**
+	 * @param string $key
+	 * @return string
+	 */
 	protected function formatEntryKey(string $key): string
 	{
 		return self::NS_NETTE . ':' . str_replace(Cache::NAMESPACE_SEPARATOR, ':', $key);
@@ -106,7 +117,7 @@ final class RedisStorage implements Storage
 	private static function processStoredValue(string $key, string $storedValue): array
 	{
 		[$meta, $data] = explode(Cache::NAMESPACE_SEPARATOR, $storedValue, 2) + [null, null];
-		return [[self::KEY => $key] + json_decode((string)$meta, true), $data];
+		return [[self::KEY => $key] + json_decode((string) $meta, true), $data];
 	}
 
 	/**
@@ -168,23 +179,41 @@ final class RedisStorage implements Storage
 	 *
 	 * @param string $key
 	 */
-	public function remove(string $key): void
+	public function remove($key): void
 	{
-		$this->client->del($this->formatEntryKey($key));
+		$this->client->del([$this->formatEntryKey($key)]);
 	}
 
 	/**
-	 * @param mixed $stored
+	 * @param mixed[] $stored
 	 * @return mixed
 	 */
-	private static function getUnserializedValue($stored)
+	private static function getUnserializedValue(array $stored)
 	{
-		if (empty($stored[0][self::META_SERIALIZED])) {
-			return $stored[1];
+		return self::unserializeData($stored[1], $stored[0]);
+	}
 
+	/**
+	 * @param string $data
+	 * @param mixed[] $meta
+	 * @return mixed
+	 */
+	private static function unserializeData(string $data, array $meta)
+	{
+		switch ($meta[self::META_SERIALIZED] ?? 0) {
+			case self::SERIALIZE_IGBINARY:
+				if (self::$igbinary) {
+					return @igbinary_unserialize($data);
+				}
+
+				throw new LogicalException('Incompatible serialization method, igbinary is missing');
+
+			case self::SERIALIZE_PHP:
+				return @unserialize($data);
+
+			default:
+				return $data;
 		}
-
-		return @unserialize($stored[1]); // intentionally @
 	}
 
 	/**
@@ -225,7 +254,10 @@ final class RedisStorage implements Storage
 		return $result;
 	}
 
-	public function lock(string $key): void
+	/**
+	 * @param string $key
+	 */
+	public function lock($key): void
 	{
 		// unsupported now
 	}
@@ -239,7 +271,7 @@ final class RedisStorage implements Storage
 	 * @throws InvalidStateException
 	 * @throws PredisException
 	 */
-	public function write(string $key, $data, array $dependencies): void
+	public function write($key, $data, array $dependencies): void
 	{
 		$meta = [
 			self::META_TIME => microtime(),
@@ -276,11 +308,7 @@ final class RedisStorage implements Storage
 			$this->journal->write($cacheKey, $dependencies);
 		}
 
-		if (!is_string($data)) {
-			$data = serialize($data);
-			$meta[self::META_SERIALIZED] = true;
-		}
-
+		$data = self::serializeData($data, $meta);
 		$store = json_encode($meta) . Cache::NAMESPACE_SEPARATOR . $data;
 
 		try {
@@ -297,6 +325,26 @@ final class RedisStorage implements Storage
 			$this->remove($key);
 			throw new InvalidStateException($e->getMessage(), $e->getCode(), $e);
 		}
+	}
+
+	/**
+	 * @param mixed $data
+	 * @param mixed[] $meta
+	 * @return string
+	 */
+	private static function serializeData($data, array &$meta): string
+	{
+		if (self::$igbinary) {
+			$meta[self::META_SERIALIZED] = self::SERIALIZE_IGBINARY;
+			return @igbinary_serialize($data);
+		}
+
+		if (!is_string($data)) {
+			$meta[self::META_SERIALIZED] = self::SERIALIZE_PHP;
+			return @serialize($data);
+		}
+
+		return $data;
 	}
 
 	/**

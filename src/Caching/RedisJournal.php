@@ -4,7 +4,7 @@ namespace Contributte\Redis\Caching;
 
 use Exception;
 use Nette\Caching\Cache;
-use Nette\Caching\Storages\Journal;
+use Nette\Caching\Storages\IJournal as Journal;
 use Predis\Client;
 use function array_merge;
 use function array_unique;
@@ -20,7 +20,7 @@ final class RedisJournal implements Journal
 	private const TAGS = 'tags';
 	private const KEYS = 'keys';
 
-	/** @var Client */
+	/** @var Client<mixed> */
 	protected $client;
 
 	/**
@@ -39,7 +39,7 @@ final class RedisJournal implements Journal
 	 * @return void
 	 * @throws Exception
 	 */
-	public function write(string $key, array $dependencies): void
+	public function write($key, array $dependencies): void
 	{
 		$this->cleanEntry($key);
 

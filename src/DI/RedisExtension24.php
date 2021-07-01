@@ -48,7 +48,7 @@ final class RedisExtension24 extends CompilerExtension
 
 		$connections = [];
 
-		$builder->addDefinition($this->prefix('journal'))->setType(RedisJournal::class);
+		$builder->addDefinition($this->prefix('journal'))->setType(RedisJournal::class)->setAutowired(false);
 
 		foreach ($config['connection'] as $name => $connection) {
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
@@ -90,7 +90,9 @@ final class RedisExtension24 extends CompilerExtension
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
 			// Skip if replacing storage is disabled
-			if ($connection['storage'] === false) continue;
+			if ($connection['storage'] === false) {
+				continue;
+			}
 
 			// Validate needed services
 			if ($builder->getByType(IStorage::class) === null) {
@@ -102,6 +104,9 @@ final class RedisExtension24 extends CompilerExtension
 
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
 				->setFactory(RedisStorage::class)
+				->setArguments([
+					'journal' => $builder->getDefinition($this->prefix('journal')),
+				])
 				->setAutowired(true);
 		}
 	}
@@ -117,7 +122,9 @@ final class RedisExtension24 extends CompilerExtension
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
 			// Skip if replacing session is disabled
-			if ($connection['sessions'] === false) continue;
+			if ($connection['sessions'] === false) {
+				continue;
+			}
 
 			if ($sessionHandlingConnection === null) {
 				$sessionHandlingConnection = $name;
