@@ -6,6 +6,7 @@ use Contributte\Redis\Caching\RedisJournal;
 use Contributte\Redis\Caching\RedisStorage;
 use Nette\Caching\Cache;
 use Predis\Client;
+use stdClass;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -18,8 +19,8 @@ test(function (): void {
 
 	$testData = [
 		'test' => 'val',
-		'object' => new \stdClass,
-		'object with data' => (object)['row' => 'val']
+		'object' => new stdClass(),
+		'object with data' => (object) ['row' => 'val'],
 	];
 
 	$cache->save('testkey1', $testData, [
@@ -44,7 +45,7 @@ test(function (): void {
 		Cache::TAGS => ['test/2', 'test'],
 	]);
 	Assert::equal($testData, $cache->load('testkey1'));
-	$cache->clean([Cache::TAGS => ['test/2']]);
+	$cache->clean([Cache::TAGS => ['test']]);
 	Assert::null($cache->load('testkey1'));
 	Assert::null($cache->load('testkey2'));
 	Assert::same('ok', $cache->load('check'));

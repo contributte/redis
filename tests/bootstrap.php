@@ -9,4 +9,3 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 
 // Configure environment
 Environment::setup(__DIR__);
-
