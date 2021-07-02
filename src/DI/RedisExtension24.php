@@ -21,6 +21,7 @@ final class RedisExtension24 extends CompilerExtension
 	/** @var mixed[] */
 	private $defaults = [
 		'debug' => false,
+		'serializer' => null,
 		'connection' => [],
 	];
 
@@ -106,6 +107,7 @@ final class RedisExtension24 extends CompilerExtension
 				->setFactory(RedisStorage::class)
 				->setArguments([
 					'journal' => $builder->getDefinition($this->prefix('journal')),
+					'serializer' => $config['serializer'],
 				])
 				->setAutowired(true);
 		}
