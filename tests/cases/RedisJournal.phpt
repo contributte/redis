@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Tests\Cases\Redis;
 
@@ -15,15 +15,15 @@ require_once __DIR__ . '/../bootstrap.php';
 
 test(function (): void {
 	try {
-		$client = new Client;
+		$client = new Client();
 		$journal = new RedisJournal($client);
 		$storage = new RedisStorage($client, $journal);
 		$cache = new Cache($storage);
 
 		$testData = [
 			'test' => 'val',
-			'object' => new stdClass,
-			'object with data' => (object)['row' => 'val'],
+			'object' => new stdClass(),
+			'object with data' => (object) ['row' => 'val'],
 		];
 
 		$cache->save('testkey1', $testData, [
