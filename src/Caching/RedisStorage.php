@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Contributte\Redis\Caching;
 
@@ -52,7 +52,7 @@ final class RedisStorage implements Storage
 	{
 		$this->client = $client;
 		$this->journal = $journal;
-		$this->serializer = $serializer ?: new DefaultSerializer;
+		$this->serializer = $serializer ?: new DefaultSerializer();
 	}
 
 	/**
@@ -120,7 +120,7 @@ final class RedisStorage implements Storage
 	private static function processStoredValue(string $key, string $storedValue): array
 	{
 		[$meta, $data] = explode(Cache::NAMESPACE_SEPARATOR, $storedValue, 2) + [null, null];
-		return [[self::KEY => $key] + json_decode((string)$meta, true), $data];
+		return [[self::KEY => $key] + json_decode((string) $meta, true), $data];
 	}
 
 	/**
@@ -262,12 +262,12 @@ final class RedisStorage implements Storage
 				$meta[self::META_EXPIRE] = $dependencies[Cache::EXPIRATION] + time(); // absolute time
 
 			} else {
-				$meta[self::META_DELTA] = (int)$dependencies[Cache::EXPIRATION]; // sliding time
+				$meta[self::META_DELTA] = (int) $dependencies[Cache::EXPIRATION]; // sliding time
 			}
 		}
 
 		if (isset($dependencies[Cache::ITEMS])) {
-			foreach ((array)$dependencies[Cache::ITEMS] as $itemName) {
+			foreach ((array) $dependencies[Cache::ITEMS] as $itemName) {
 				$m = $this->readMeta($itemName);
 				$meta[self::META_ITEMS][$itemName] = $m[self::META_TIME] ?? null; // may be null
 				unset($m);

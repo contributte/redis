@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Contributte\Redis\Serializer;
 
@@ -6,11 +6,11 @@ use Contributte\Redis\Exception\LogicalException;
 
 final class DefaultSerializer implements Serializer
 {
+
 	private const SERIALIZE_IGBINARY = 2;
 	private const SERIALIZE_PHP = 1;
 
 	private const META_SERIALIZED = 'serialized';
-
 
 	/** @var bool */
 	private $igbinary;
@@ -52,6 +52,7 @@ final class DefaultSerializer implements Serializer
 				if ($this->igbinary) {
 					return @igbinary_unserialize($data);
 				}
+
 				throw new LogicalException('Incompatible serialization method, igbinary is missing but required.');
 
 			case self::SERIALIZE_PHP:
@@ -61,4 +62,5 @@ final class DefaultSerializer implements Serializer
 				return $data;
 		}
 	}
+
 }

@@ -1,9 +1,10 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Contributte\Redis\Serializer;
 
 interface Serializer
 {
+
 	/**
 	 * @param mixed $data
 	 * @param mixed[] $meta
@@ -17,4 +18,5 @@ interface Serializer
 	 * @return mixed
 	 */
 	public function unserialize(string $data, array $meta);
+
 }
