@@ -10,29 +10,21 @@ use Nette\Caching\Storages\IJournal as Journal;
 use Nette\InvalidStateException;
 use Predis\Client;
 use Predis\PredisException;
-use function array_map;
-use function explode;
-use function json_decode;
-use function json_encode;
-use function microtime;
-use function str_replace;
-use function time;
 
+/**
+ * @see based on original https://github.com/Kdyby/Redis
+ */
 final class RedisStorage implements Storage
 {
 
-	private const NS_NETTE = 'Nette.Storage';
+	private const NS_NETTE = 'Contributte.Storage';
 
 	private const META_TIME = 'time'; // timestamp
 	private const META_EXPIRE = 'expire'; // expiration timestamp
 	private const META_DELTA = 'delta'; // relative (sliding) expiration
 	private const META_ITEMS = 'di'; // array of dependent items (file => timestamp)
 	private const META_CALLBACKS = 'callbacks'; // array of callbacks (function, args)
-
-	/**
-	 * additional cache structure
-	 */
-	private const KEY = 'key';
+	private const KEY = 'key'; // additional cache structure
 
 	/** @var Client<mixed> $client */
 	private $client;
@@ -55,9 +47,6 @@ final class RedisStorage implements Storage
 		$this->serializer = $serializer ?: new DefaultSerializer();
 	}
 
-	/**
-	 * @param Serializer $serializer
-	 */
 	public function setSerializer(Serializer $serializer): void
 	{
 		$this->serializer = $serializer;
@@ -76,7 +65,6 @@ final class RedisStorage implements Storage
 	 *
 	 * @param string $key
 	 * @return mixed|null
-	 * @throws PredisException
 	 */
 	public function read($key)
 	{
@@ -86,95 +74,6 @@ final class RedisStorage implements Storage
 		}
 
 		return $this->getUnserializedValue($stored);
-	}
-
-	/**
-	 * @param string $key
-	 * @return mixed[]|null
-	 * @throws PredisException
-	 */
-	private function doRead(string $key): ?array
-	{
-		$stored = $this->client->get($this->formatEntryKey($key));
-		if (!$stored) {
-			return null;
-		}
-
-		return self::processStoredValue($key, $stored);
-	}
-
-	/**
-	 * @param string $key
-	 * @return string
-	 */
-	protected function formatEntryKey(string $key): string
-	{
-		return self::NS_NETTE . ':' . str_replace(Cache::NAMESPACE_SEPARATOR, ':', $key);
-	}
-
-	/**
-	 * @param string $key
-	 * @param string $storedValue
-	 * @return mixed[]
-	 */
-	private static function processStoredValue(string $key, string $storedValue): array
-	{
-		[$meta, $data] = explode(Cache::NAMESPACE_SEPARATOR, $storedValue, 2) + [null, null];
-		return [[self::KEY => $key] + json_decode((string) $meta, true), $data];
-	}
-
-	/**
-	 * Verifies dependencies.
-	 *
-	 * @param mixed[] $meta
-	 * @return bool
-	 * @throws PredisException
-	 */
-	protected function verify(array $meta): bool
-	{
-		do {
-			if (!empty($meta[self::META_DELTA])) {
-				$this->client->expire($this->formatEntryKey($meta[self::KEY]), $meta[self::META_DELTA]);
-
-			} elseif (!empty($meta[self::META_EXPIRE]) && $meta[self::META_EXPIRE] < time()) {
-				break;
-			}
-
-			if (!empty($meta[self::META_CALLBACKS]) && !Cache::checkCallbacks($meta[self::META_CALLBACKS])) {
-				break;
-			}
-
-			if (!empty($meta[self::META_ITEMS])) {
-				foreach ($meta[self::META_ITEMS] as $itemKey => $time) {
-					$m = $this->readMeta($itemKey);
-					$metaTime = $m[self::META_TIME] ?? null;
-					if ($metaTime !== $time || ($m && !$this->verify($m))) {
-						break 2;
-					}
-				}
-			}
-
-			return true;
-		} while (false);
-
-		$this->remove($meta[self::KEY]); // meta[handle] & meta[file] was added by readMetaAndLock()
-		return false;
-	}
-
-	/**
-	 * @param string $key
-	 * @return mixed[]|null
-	 * @throws PredisException
-	 */
-	protected function readMeta(string $key): ?array
-	{
-		$stored = $this->doRead($key);
-
-		if (!$stored) {
-			return null;
-		}
-
-		return $stored[0];
 	}
 
 	/**
@@ -188,20 +87,10 @@ final class RedisStorage implements Storage
 	}
 
 	/**
-	 * @param mixed[] $stored
-	 * @return mixed
-	 */
-	private function getUnserializedValue(array $stored)
-	{
-		return $this->serializer->unserialize($stored[1], $stored[0]);
-	}
-
-	/**
 	 * Read multiple entries from cache (using mget)
 	 *
 	 * @param mixed[] $keys
 	 * @return mixed[]
-	 * @throws PredisException
 	 */
 	public function multiRead(array $keys): array
 	{
@@ -216,23 +105,6 @@ final class RedisStorage implements Storage
 		return $values;
 	}
 
-	/**
-	 * @param mixed[] $keys
-	 * @return mixed[]
-	 * @throws PredisException
-	 */
-	private function doMultiRead(array $keys): array
-	{
-		$formattedKeys = array_map([$this, 'formatEntryKey'], $keys);
-
-		$result = [];
-		foreach ($this->client->mget([$formattedKeys]) as $index => $stored) {
-			$key = $keys[$index];
-			$result[$key] = $stored !== false ? self::processStoredValue($key, $stored) : null;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * @param string $key
@@ -248,8 +120,6 @@ final class RedisStorage implements Storage
 	 * @param string $key
 	 * @param mixed $data
 	 * @param mixed[] $dependencies
-	 * @throws InvalidStateException
-	 * @throws PredisException
 	 */
 	public function write($key, $data, array $dependencies): void
 	{
@@ -308,7 +178,6 @@ final class RedisStorage implements Storage
 	}
 
 	/**
-	 * @param string $key
 	 * @internal
 	 */
 	public function unlock(string $key): void
@@ -320,7 +189,6 @@ final class RedisStorage implements Storage
 	 * Removes items from the cache by conditions & garbage collector.
 	 *
 	 * @param mixed[] $conditions
-	 * @throws PredisException
 	 */
 	public function clean(array $conditions): void
 	{
@@ -337,6 +205,115 @@ final class RedisStorage implements Storage
 				$this->client->del($keys);
 			}
 		}
+	}
+
+	private function formatEntryKey(string $key): string
+	{
+		return self::NS_NETTE . ':' . str_replace(Cache::NAMESPACE_SEPARATOR, ':', $key);
+	}
+
+
+	/**
+	 * Verifies dependencies.
+	 *
+	 * @param mixed[] $meta
+	 * @return bool
+	 */
+	private function verify(array $meta): bool
+	{
+		do {
+			if (!empty($meta[self::META_DELTA])) {
+				$this->client->expire($this->formatEntryKey($meta[self::KEY]), $meta[self::META_DELTA]);
+
+			} elseif (!empty($meta[self::META_EXPIRE]) && $meta[self::META_EXPIRE] < time()) {
+				break;
+			}
+
+			if (!empty($meta[self::META_CALLBACKS]) && !Cache::checkCallbacks($meta[self::META_CALLBACKS])) {
+				break;
+			}
+
+			if (!empty($meta[self::META_ITEMS])) {
+				foreach ($meta[self::META_ITEMS] as $itemKey => $time) {
+					$m = $this->readMeta($itemKey);
+					$metaTime = $m[self::META_TIME] ?? null;
+					if ($metaTime !== $time || ($m && !$this->verify($m))) {
+						break 2;
+					}
+				}
+			}
+
+			return true;
+		} while (false);
+
+		$this->remove($meta[self::KEY]); // meta[handle] & meta[file] was added by readMetaAndLock()
+		return false;
+	}
+
+	/**
+	 * @param string $key
+	 * @return mixed[]|null
+	 */
+	protected function readMeta(string $key): ?array
+	{
+		$stored = $this->doRead($key);
+
+		if (!$stored) {
+			return null;
+		}
+
+		return $stored[0];
+	}
+
+	/**
+	 * @param mixed[] $stored
+	 * @return mixed
+	 */
+	private function getUnserializedValue(array $stored)
+	{
+		return $this->serializer->unserialize($stored[1], $stored[0]);
+	}
+
+	/**
+	 * @param string $key
+	 * @return mixed[]|null
+	 */
+	private function doRead(string $key): ?array
+	{
+		$stored = $this->client->get($this->formatEntryKey($key));
+		if (!$stored) {
+			return null;
+		}
+
+		return self::processStoredValue($key, $stored);
+	}
+
+	/**
+	 * @param mixed[] $keys
+	 * @return mixed[]
+	 */
+	private function doMultiRead(array $keys): array
+	{
+		$formattedKeys = array_map([$this, 'formatEntryKey'], $keys);
+
+		$result = [];
+		foreach ($this->client->mget([$formattedKeys]) as $index => $stored) {
+			$key = $keys[$index];
+			$result[$key] = $stored !== false ? self::processStoredValue($key, $stored) : null;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param string $key
+	 * @param string $storedValue
+	 * @return mixed[]
+	 */
+	private static function processStoredValue(string $key, string $storedValue): array
+	{
+		[$meta, $data] = explode(Cache::NAMESPACE_SEPARATOR, $storedValue, 2) + [null, null];
+		return [[self::KEY => $key] + json_decode((string) $meta, true), $data];
 	}
 
 }

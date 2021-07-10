@@ -1,17 +1,18 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Redis;
+namespace Tests\Cases\Redis\Caching;
 
 use Contributte\Redis\Caching\RedisStorage;
 use Mockery;
+use Ninjify\Nunjuck\Toolkit;
 use Predis\Client;
 use Predis\Command\Command;
 use Predis\Connection\ConnectionInterface;
 use Tester\Assert;
 
-require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php';
 
-test(function (): void {
+Toolkit::test(function (): void {
 	$storage = (object) ['unserialized' => 'unserialized'];
 
 	$conn = Mockery::mock(ConnectionInterface::class)

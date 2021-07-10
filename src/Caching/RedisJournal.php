@@ -2,26 +2,24 @@
 
 namespace Contributte\Redis\Caching;
 
-use Exception;
 use Nette\Caching\Cache;
 use Nette\Caching\Storages\IJournal as Journal;
 use Predis\Client;
-use function array_merge;
-use function array_unique;
-use function call_user_func_array;
-use function is_array;
 
+/**
+ * @see based on original https://github.com/Kdyby/Redis
+ */
 final class RedisJournal implements Journal
 {
 
-	private const NS_NETTE = 'Nette.Journal';
+	private const NS_NETTE = 'Contributte.Journal';
 
 	private const PRIORITY = 'priority';
 	private const TAGS = 'tags';
 	private const KEYS = 'keys';
 
 	/** @var Client<mixed> */
-	protected $client;
+	private $client;
 
 	/**
 	 * @param Client<mixed> $client
@@ -37,7 +35,6 @@ final class RedisJournal implements Journal
 	 * @param string $key
 	 * @param mixed[] $dependencies
 	 * @return void
-	 * @throws Exception
 	 */
 	public function write($key, array $dependencies): void
 	{
@@ -63,7 +60,6 @@ final class RedisJournal implements Journal
 	 * Deletes all keys from associated tags and all priorities
 	 *
 	 * @param mixed[]|string $keys
-	 * @throws Exception
 	 */
 	private function cleanEntry($keys): void
 	{
@@ -88,7 +84,6 @@ final class RedisJournal implements Journal
 	 *
 	 * @param mixed[] $conditions
 	 * @return mixed[] of removed items or NULL when performing a full cleanup
-	 * @throws Exception
 	 */
 	public function clean(array $conditions): ?array
 	{
@@ -134,7 +129,7 @@ final class RedisJournal implements Journal
 	 */
 	private function entryTags(string $key): array
 	{
-		return $this->client->smembers($this->formatKey($key, self::TAGS)) ? : [];
+		return $this->client->smembers($this->formatKey($key, self::TAGS)) ?: [];
 	}
 
 	/**
@@ -143,10 +138,10 @@ final class RedisJournal implements Journal
 	 */
 	private function tagEntries(string $tag): array
 	{
-		return $this->client->smembers($this->formatKey($tag, self::KEYS)) ? : [];
+		return $this->client->smembers($this->formatKey($tag, self::KEYS)) ?: [];
 	}
 
-	protected function formatKey(string $key, ?string $suffix = null): string
+	private function formatKey(string $key, ?string $suffix = null): string
 	{
 		return self::NS_NETTE . ':' . $key . ($suffix ? ':' . $suffix : null);
 	}
