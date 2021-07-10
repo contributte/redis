@@ -26,3 +26,10 @@ coverage-clover:
 
 coverage-html:
 	vendor/bin/tester -s -p phpdbg --colors 1 -C --coverage ./coverage.html --coverage-src ./src tests/cases
+
+redis-start: redis-stop
+	docker run -it -d -p 6379:6379 --name contributte-redis redis:5-alpine
+
+redis-stop:
+	docker stop contributte-redis || true
+	docker rm contributte-redis || true
