@@ -2,10 +2,11 @@
 
 namespace Contributte\Redis\DI;
 
+use Contributte\Redis\Caching\RedisJournal;
 use Contributte\Redis\Caching\RedisStorage;
 use Contributte\Redis\Exception\Logic\InvalidStateException;
 use Contributte\Redis\Tracy\RedisPanel;
-use Nette\Caching\IStorage;
+use Nette\Caching\Storage;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\ServiceDefinition;
 use Nette\Http\Session;
@@ -27,6 +28,7 @@ final class RedisExtension extends CompilerExtension
 	{
 		return Expect::structure([
 			'debug' => Expect::bool(false),
+			'serializer' => Expect::anyOf(Expect::string()),
 			'connection' => Expect::arrayOf(Expect::structure([
 				'uri' => Expect::anyOf(Expect::string(), Expect::listOf(Expect::string()))->default('tcp://127.0.0.1:6379'),
 				'options' => Expect::array(),
@@ -45,6 +47,8 @@ final class RedisExtension extends CompilerExtension
 		$config = $this->config;
 
 		$connections = [];
+
+		$builder->addDefinition($this->prefix('journal'))->setType(RedisJournal::class);
 
 		foreach ($config->connection as $name => $connection) {
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
@@ -87,11 +91,11 @@ final class RedisExtension extends CompilerExtension
 			}
 
 			// Validate needed services
-			if ($builder->getByType(IStorage::class) === null) {
-				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', IStorage::class));
+			if ($builder->getByType(Storage::class) === null) {
+				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', Storage::class));
 			}
 
-			$builder->getDefinitionByType(IStorage::class)
+			$builder->getDefinitionByType(Storage::class)
 				->setAutowired(false);
 
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))

@@ -15,7 +15,8 @@ composer require contributte/redis
 
 ```neon
 extensions:
-	redis: Contributte\Redis\DI\RedisExtension
+	redis: Contributte\Redis\DI\RedisExtension # For Nette 3+
+	redis: Contributte\Redis\DI\RedisExtension24 # For Nette 2.4
 ```
 
 ## Configuration
@@ -57,7 +58,22 @@ Replaces Nette\Caching\IStorage in DIC with RedisStorage
 redis:
 	connection:
 		default:
-			storage: false
+			storage: true
+```
+
+### Custom serializer
+
+Use custom serializer for Storage, serializer need to implement Contributte/Redis/Serializer/Serializer
+
+```neon
+redis:
+	serializer: @customSerializer
+	connection:
+		default:
+			storage: true
+
+services:
+    customSerializer: App\Serializers\YourSerializer
 ```
 
 ### Sessions and cache
