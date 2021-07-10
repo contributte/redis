@@ -4,6 +4,7 @@
   "keywords": [
     "nette",
     "redis",
+    "cache",
     "predis"
   ],
   "type": "library",
