@@ -25,6 +25,7 @@ To install the latest version of `contributte/redis` use [Composer](https://getc
 ```bash
 composer require contributte/redis
 ```
+
 ## Documentation
 
 For details on how to use this package, check out our [documentation](.docs).
