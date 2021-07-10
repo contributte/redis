@@ -6,7 +6,7 @@ use Contributte\Redis\Caching\RedisJournal;
 use Contributte\Redis\Caching\RedisStorage;
 use Contributte\Redis\Exception\Logic\InvalidStateException;
 use Contributte\Redis\Tracy\RedisPanel;
-use Nette\Caching\Storage;
+use Nette\Caching\IStorage;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\ServiceDefinition;
 use Nette\Http\Session;
@@ -91,11 +91,11 @@ final class RedisExtension extends CompilerExtension
 			}
 
 			// Validate needed services
-			if ($builder->getByType(Storage::class) === null) {
-				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', Storage::class));
+			if ($builder->getByType(IStorage::class) === null) {
+				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', IStorage::class));
 			}
 
-			$builder->getDefinitionByType(Storage::class)
+			$builder->getDefinitionByType(IStorage::class)
 				->setAutowired(false);
 
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
