@@ -2,7 +2,7 @@
 
 namespace Contributte\Redis\Serializer;
 
-final class DefaultSerializer implements Serializer
+final class IgbinarySerializer implements Serializer
 {
 
 	/**
@@ -10,16 +10,15 @@ final class DefaultSerializer implements Serializer
 	 */
 	public function serialize($data, array &$meta): string
 	{
-		return @serialize($data);
+		return @igbinary_serialize($data);
 	}
-
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function unserialize(string $data, array $meta)
 	{
-		return @unserialize($data);
+		return @igbinary_unserialize($data);
 	}
 
 }
