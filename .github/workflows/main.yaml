@@ -145,7 +145,7 @@ jobs:
 
     strategy:
       matrix:
-        php-version: [ "7.2", "7.3", "7.4" ]
+        php-version: [ "7.2", "7.3", "7.4", "8.0" ]
         redis-version: [ "5" ]
         operating-system: [ "ubuntu-latest" ]
         composer-args: [ "" ]
@@ -153,9 +153,6 @@ jobs:
           - php-version: "7.2"
             operating-system: "ubuntu-latest"
             composer-args: "--prefer-lowest"
-          - php-version: "8.0"
-            operating-system: "ubuntu-latest"
-            composer-args: ""
       fail-fast: false
 
     steps:
@@ -187,10 +184,10 @@ jobs:
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Start REDIS"
-        uses: supercharge/redis-github-action@1.2.0
+      - name: "Setup redis"
+        uses: "supercharge/redis-github-action@1.2.0"
         with:
-          redis-version: ${{ matrix.redis-version }}
+          redis-version: "${{ matrix.redis-version }}"
 
       - name: "Setup problem matchers for PHP"
         run: 'echo "::add-matcher::${{ runner.tool_cache }}/php.json"'
@@ -261,10 +258,10 @@ jobs:
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Start REDIS"
-        uses: supercharge/redis-github-action@1.2.0
+      - name: "Setup redis"
+        uses: "supercharge/redis-github-action@1.2.0"
         with:
-          redis-version: ${{ matrix.redis-version }}
+          redis-version: "${{ matrix.redis-version }}"
 
       - name: "Setup problem matchers for PHP"
         run: 'echo "::add-matcher::${{ runner.tool_cache }}/php.json"'
