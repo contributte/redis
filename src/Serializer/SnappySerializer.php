@@ -10,7 +10,7 @@ final class SnappySerializer implements Serializer
 	 */
 	public function serialize($data, array &$meta): string
 	{
-		return @snappy_compress($data);
+		return @snappy_compress(json_encode($data));
 	}
 
 	/**
@@ -18,7 +18,7 @@ final class SnappySerializer implements Serializer
 	 */
 	public function unserialize(string $data, array $meta)
 	{
-		return @snappy_uncompress($data);
+		return json_decode(@snappy_uncompress($data));
 	}
 
 }
