@@ -98,16 +98,16 @@ final class RedisExtension extends CompilerExtension
 			}
 
 			// Set autowired off for default nette Caching storage
-			if($storages === 0) {
-				$builder->getDefinitionByType( IStorage::class )
-				        ->setAutowired( false );
+			if ($storages === 0) {
+				$builder->getDefinitionByType(IStorage::class)
+					->setAutowired(false);
 			}
 
 			// Set autowired only default redis connection
-			$autowired = $name === "default";
+			$autowired = $name === 'default';
 
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
-				->setFactory(RedisStorage::class, ["client" => $builder->getDefinition($this->prefix('connection.' . $name . '.client'))]) // Inject Redis client by connection
+				->setFactory(RedisStorage::class, ['client' => $builder->getDefinition($this->prefix('connection.' . $name . '.client'))]) // Inject Redis client by connection
 				->setAutowired($autowired);
 
 			$storages++;
