@@ -84,6 +84,8 @@ final class RedisExtension extends CompilerExtension
 		$builder = $this->getContainerBuilder();
 		$config = $this->config;
 
+		$storages = 0;
+
 		foreach ($config->connection as $name => $connection) {
 			// Skip if replacing storage is disabled
 			if (!$connection->storage) {
@@ -95,11 +97,20 @@ final class RedisExtension extends CompilerExtension
 				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', IStorage::class));
 			}
 
-			$builder->getDefinitionByType(IStorage::class)
-				->setAutowired(false);
+			// Set autowired off for default nette Caching storage
+			if($storages === 0) {
+				$builder->getDefinitionByType( IStorage::class )
+				        ->setAutowired( false );
+			}
+
+			// Set autowired only default redis connection
+			$autowired = $name === "default";
 
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
-				->setFactory(RedisStorage::class);
+				->setFactory(RedisStorage::class, ["client" => $builder->getDefinition($this->prefix('connection.' . $name . '.client'))]) // Inject Redis client by connection
+				->setAutowired($autowired);
+
+			$storages++;
 		}
 	}
 
