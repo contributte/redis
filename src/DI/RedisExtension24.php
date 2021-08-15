@@ -49,8 +49,6 @@ final class RedisExtension24 extends CompilerExtension
 
 		$connections = [];
 
-		$builder->addDefinition($this->prefix('journal'))->setType(RedisJournal::class)->setAutowired(false);
-
 		foreach ($config['connection'] as $name => $connection) {
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
@@ -103,10 +101,14 @@ final class RedisExtension24 extends CompilerExtension
 			$builder->getDefinitionByType(IStorage::class)
 				->setAutowired(false);
 
+			$builder->addDefinition($this->prefix('connection.' . $name . 'journal'))
+				->setFactory(RedisJournal::class)
+				->setAutowired(false);
+
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
 				->setFactory(RedisStorage::class)
 				->setArguments([
-					'journal' => $builder->getDefinition($this->prefix('journal')),
+					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . 'journal')),
 					'serializer' => $config['serializer'],
 				])
 				->setAutowired(true);

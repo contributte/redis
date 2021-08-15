@@ -48,8 +48,6 @@ final class RedisExtension extends CompilerExtension
 
 		$connections = [];
 
-		$builder->addDefinition($this->prefix('journal'))->setType(RedisJournal::class);
-
 		foreach ($config->connection as $name => $connection) {
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
 				->setType(Client::class)
@@ -98,8 +96,16 @@ final class RedisExtension extends CompilerExtension
 			$builder->getDefinitionByType(IStorage::class)
 				->setAutowired(false);
 
+			$builder->addDefinition($this->prefix('connection.' . $name . 'journal'))
+				->setFactory(RedisJournal::class)
+				->setAutowired(false);
+
 			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
-				->setFactory(RedisStorage::class);
+				->setFactory(RedisStorage::class)
+				->setArguments([
+					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . 'journal')),
+					'serializer' => $config->serializer,
+				]);
 		}
 	}
 
