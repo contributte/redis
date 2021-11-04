@@ -50,15 +50,13 @@ final class RedisExtension24 extends CompilerExtension
 		$connections = [];
 
 		foreach ($config['connection'] as $name => $connection) {
+			$autowired = $name === 'default';
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
 				->setType(Client::class)
-				->setArguments([$connection['uri'], $connection['options']]);
-
-			if ($name !== 'default') {
-				$client->setAutowired(false);
-			}
+				->setArguments([$connection['uri'], $connection['options']])
+				->setAutowired($autowired);
 
 			$connections[] = [
 				'name' => $name,
@@ -86,6 +84,7 @@ final class RedisExtension24 extends CompilerExtension
 		$config = $this->validateConfig($this->defaults);
 
 		foreach ($config['connection'] as $name => $connection) {
+			$autowired = $name === 'default';
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
 			// Skip if replacing storage is disabled
@@ -101,17 +100,18 @@ final class RedisExtension24 extends CompilerExtension
 			$builder->getDefinitionByType(IStorage::class)
 				->setAutowired(false);
 
-			$builder->addDefinition($this->prefix('connection.' . $name . 'journal'))
+			$builder->addDefinition($this->prefix('connection.' . $name . '.journal'))
 				->setFactory(RedisJournal::class)
 				->setAutowired(false);
 
-			$builder->addDefinition($this->prefix('connection.' . $name . 'storage'))
+			$builder->addDefinition($this->prefix('connection.' . $name . '.storage'))
 				->setFactory(RedisStorage::class)
 				->setArguments([
-					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . 'journal')),
+					'client' => $builder->getDefinition($this->prefix('connection.' . $name . '.client')),
+					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . '.journal')),
 					'serializer' => $config['serializer'],
 				])
-				->setAutowired(true);
+				->setAutowired($autowired);
 		}
 	}
 
