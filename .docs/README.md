@@ -63,7 +63,9 @@ redis:
 
 ### Custom serializer
 
-Use custom serializer for Storage, serializer need to implement Contributte/Redis/Serializer/Serializer
+To use custom serializer for storage you need to implement `Contributte/Redis/Serializer/Serializer` interface.
+
+After that, register serializer as a service and place it under `redis.serializer` key.
 
 ```neon
 redis:
@@ -75,6 +77,12 @@ redis:
 services:
     customSerializer: App\Serializers\YourSerializer
 ```
+
+This package provides several serializers:
+
+- DefaultSerializer
+- IgbinarySerializer
+- SnappySerializer
 
 ### Sessions and cache
 
