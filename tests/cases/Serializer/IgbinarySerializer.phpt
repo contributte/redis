@@ -4,7 +4,7 @@
  * @phpExtension igbinary
  */
 
-namespace Tests\Cases\Redis\Serializer;
+namespace Tests\Cases\Serializer;
 
 use Contributte\Redis\Serializer\IgbinarySerializer;
 use Ninjify\Nunjuck\Toolkit;

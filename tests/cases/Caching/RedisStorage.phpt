@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Redis\Caching;
+namespace Tests\Cases\Caching;
 
 use Contributte\Redis\Caching\RedisStorage;
 use Mockery;
