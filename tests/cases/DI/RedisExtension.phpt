@@ -131,3 +131,31 @@ Toolkit::test(function (): void {
 	Assert::notSame(Liberator::of($storage1)->client, Liberator::of($storage2)->client);
 	Assert::notSame(Liberator::of($storage1)->journal, Liberator::of($storage2)->journal);
 });
+
+// Dynamic parameters
+Toolkit::test(function (): void {
+	$container = Container::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addConfig(Helpers::neon('
+				redis:
+					connection:
+						default:
+							uri: %env.REDIS_URI%
+			'));
+		})
+		->withDynamicParameters([
+			'env' => [
+				'REDIS_URI' => 'tcp://1.2.3.4:1234',
+			],
+		])
+		->build();
+
+	/** @var Client $client */
+	$client = $container->getService('redis.connection.default.client');
+
+	$parameters = Liberator::of($client->getConnection())->parameters->toArray();
+
+	Assert::equal('1.2.3.4', $parameters['host']);
+	Assert::equal(1234, $parameters['port']);
+});

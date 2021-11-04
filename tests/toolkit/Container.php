@@ -16,6 +16,9 @@ final class Container
 	/** @var callable[] */
 	private $onCompile = [];
 
+	/** @var mixed[] */
+	private $parameters = [];
+
 	public function __construct(string $key)
 	{
 		$this->key = $key;
@@ -63,6 +66,13 @@ final class Container
 		return $this;
 	}
 
+	public function withDynamicParameters(array $parameters): Container
+	{
+		$this->parameters = $parameters;
+
+		return $this;
+	}
+
 	public function withCompiler(callable $cb): Container
 	{
 		$this->onCompile[] = function (Compiler $compiler) use ($cb): void {
@@ -79,9 +89,11 @@ final class Container
 			foreach ($this->onCompile as $cb) {
 				$cb($compiler);
 			}
+
+			$compiler->setDynamicParameterNames(array_keys($this->parameters));
 		}, $this->key);
 
-		return new $class();
+		return new $class($this->parameters);
 	}
 
 }
