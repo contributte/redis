@@ -84,6 +84,23 @@ This package provides several serializers:
 - IgbinarySerializer
 - SnappySerializer
 
+### ENV variables
+
+In the need of passing down ENV variables to the configuration you can use `nette/configurator` and [**dynamic parameters**](https://doc.nette.org/en/3.1/bootstrap#toc-dynamic-parameters).
+
+```php
+$configurator->addDynamicParameters([
+	'env' => getenv(),
+]);
+```
+
+```neon
+redis:
+	connection:
+		default:
+			uri: %env.REDIS_HOST%
+```
+
 ### Sessions and cache
 
 When using sessions and cache make sure you use **2 different databases**. One for cache and one for sessions. In case you will use only 1 database for both **you will loose sessions when clearing cache.**
