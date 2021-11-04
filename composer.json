@@ -44,7 +44,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\Cases\\Redis\\": "tests"
+      "Tests\\Cases\\": "tests/cases",
+      "Tests\\Toolkit\\": "tests/toolkit"
     }
   },
   "minimum-stability": "dev",

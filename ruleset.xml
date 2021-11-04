@@ -9,10 +9,11 @@
 	<!-- Specific rules -->
 	<rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
 		<properties>
-			<property name="rootNamespaces" type="array" value="
-				src=>Contributte\Redis,
-				tests=>Tests\Contributte\Redis
-			"/>
+			<property name="rootNamespaces" type="array">
+				<element key="src" value="Contributte\Redis"/>
+				<element key="tests/cases" value="Tests\Cases"/>
+				<element key="tests/toolkit" value="Tests\Toolkit"/>
+			</property>
 		</properties>
 	</rule>
 

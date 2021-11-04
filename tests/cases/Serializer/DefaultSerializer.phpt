@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Redis\Serializer;
+namespace Tests\Cases\Serializer;
 
 use Contributte\Redis\Serializer\DefaultSerializer;
 use Ninjify\Nunjuck\Toolkit;
