@@ -23,7 +23,7 @@ Toolkit::test(function (): void {
 		->withDefaults()
 		->build();
 
-	Assert::type(Client::class, $container->getByName('redis.connection.default.client'));
+	Assert::type(Client::class, $container->getService('redis.connection.default.client'));
 	Assert::falsey($container->hasService('redis.connection.default.journal'));
 	Assert::falsey($container->hasService('redis.connection.default.storage'));
 });
@@ -44,9 +44,9 @@ Toolkit::test(function (): void {
 		})
 		->build();
 
-	Assert::type(Client::class, $container->getByName('redis.connection.default.client'));
-	Assert::type(RedisJournal::class, $container->getByName('redis.connection.default.journal'));
-	Assert::type(RedisStorage::class, $container->getByName('redis.connection.default.storage'));
+	Assert::type(Client::class, $container->getService('redis.connection.default.client'));
+	Assert::type(RedisJournal::class, $container->getService('redis.connection.default.journal'));
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.default.storage'));
 });
 
 // Client + Storage + Journal
@@ -65,9 +65,9 @@ Toolkit::test(function (): void {
 		})
 		->build();
 
-	Assert::type(Client::class, $container->getByName('redis.connection.default.client'));
-	Assert::type(RedisJournal::class, $container->getByName('redis.connection.default.journal'));
-	Assert::type(RedisStorage::class, $container->getByName('redis.connection.default.storage'));
+	Assert::type(Client::class, $container->getService('redis.connection.default.client'));
+	Assert::type(RedisJournal::class, $container->getService('redis.connection.default.journal'));
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.default.storage'));
 });
 
 // Multiple connections
@@ -87,11 +87,11 @@ Toolkit::test(function (): void {
 		})
 		->build();
 
-	Assert::type(Client::class, $container->getByName('redis.connection.default.client'));
+	Assert::type(Client::class, $container->getService('redis.connection.default.client'));
 	Assert::falsey($container->hasService('redis.connection.default.journal'));
 	Assert::falsey($container->hasService('redis.connection.default.storage'));
 
-	Assert::type(Client::class, $container->getByName('redis.connection.second.client'));
+	Assert::type(Client::class, $container->getService('redis.connection.second.client'));
 	Assert::falsey($container->hasService('redis.connection.second.journal'));
 	Assert::falsey($container->hasService('redis.connection.second.storage'));
 });
@@ -115,18 +115,18 @@ Toolkit::test(function (): void {
 		})
 		->build();
 
-	Assert::type(Client::class, $container->getByName('redis.connection.default.client'));
-	Assert::type(RedisJournal::class, $container->getByName('redis.connection.default.journal'));
-	Assert::type(RedisStorage::class, $container->getByName('redis.connection.default.storage'));
+	Assert::type(Client::class, $container->getService('redis.connection.default.client'));
+	Assert::type(RedisJournal::class, $container->getService('redis.connection.default.journal'));
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.default.storage'));
 
-	Assert::type(Client::class, $container->getByName('redis.connection.second.client'));
-	Assert::type(RedisJournal::class, $container->getByName('redis.connection.second.journal'));
-	Assert::type(RedisStorage::class, $container->getByName('redis.connection.second.storage'));
+	Assert::type(Client::class, $container->getService('redis.connection.second.client'));
+	Assert::type(RedisJournal::class, $container->getService('redis.connection.second.journal'));
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.second.storage'));
 
 	/** @var RedisStorage $storage1 */
-	$storage1 = $container->getByName('redis.connection.default.storage');
+	$storage1 = $container->getService('redis.connection.default.storage');
 	/** @var RedisStorage $storage2 */
-	$storage2 = $container->getByName('redis.connection.second.storage');
+	$storage2 = $container->getService('redis.connection.second.storage');
 
 	Assert::notSame(Liberator::of($storage1)->client, Liberator::of($storage2)->client);
 	Assert::notSame(Liberator::of($storage1)->journal, Liberator::of($storage2)->journal);
