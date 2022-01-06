@@ -9,3 +9,4 @@ parameters:
 
 	ignoreErrors:
 		- '#Function snappy_(.+) not found.#'
+		- "#^Do\\-while loop condition is always false\\.$#"

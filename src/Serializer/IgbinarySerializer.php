@@ -10,7 +10,7 @@ final class IgbinarySerializer implements Serializer
 	 */
 	public function serialize($data, array &$meta): string
 	{
-		return @igbinary_serialize($data);
+		return (string) @igbinary_serialize($data);
 	}
 
 	/**
