@@ -97,7 +97,7 @@ final class RedisExtension extends CompilerExtension
 
 			if ($storages === 0) {
 				$builder->getDefinitionByType(IStorage::class)
-				        ->setAutowired(FALSE);
+					->setAutowired(false);
 			}
 
 			$builder->addDefinition($this->prefix('connection.' . $name . '.journal'))
