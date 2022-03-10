@@ -6,6 +6,7 @@ use Contributte\Redis\Caching\RedisJournal;
 use Contributte\Redis\Caching\RedisStorage;
 use Contributte\Redis\DI\RedisExtension;
 use Nette\Bridges\CacheDI\CacheExtension;
+use Nette\Caching\IStorage;
 use Nette\DI\Compiler;
 use Ninjify\Nunjuck\Toolkit;
 use Predis\Client;
@@ -114,6 +115,10 @@ Toolkit::test(function (): void {
 			'));
 		})
 		->build();
+
+	Assert::noError(function () use ($container) {
+		$container->getByType(IStorage::class);
+	});
 
 	Assert::type(Client::class, $container->getService('redis.connection.default.client'));
 	Assert::type(RedisJournal::class, $container->getService('redis.connection.default.journal'));
