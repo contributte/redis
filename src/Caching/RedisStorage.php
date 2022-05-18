@@ -18,6 +18,7 @@ final class RedisStorage implements Storage
 {
 
 	private const NS_NETTE = 'Contributte.Storage';
+	private const NS_SEPARATOR = "\x00";
 
 	private const META_TIME = 'time'; // timestamp
 	private const META_EXPIRE = 'expire'; // expiration timestamp
@@ -159,7 +160,7 @@ final class RedisStorage implements Storage
 		}
 
 		$data = $this->serializer->serialize($data, $meta);
-		$store = json_encode($meta) . Cache::NAMESPACE_SEPARATOR . $data;
+		$store = json_encode($meta) . self::NS_SEPARATOR . $data;
 
 		try {
 			if (isset($dependencies[Cache::EXPIRATION])) {
@@ -209,7 +210,7 @@ final class RedisStorage implements Storage
 
 	private function formatEntryKey(string $key): string
 	{
-		return self::NS_NETTE . ':' . str_replace(Cache::NAMESPACE_SEPARATOR, ':', $key);
+		return self::NS_NETTE . ':' . str_replace(self::NS_SEPARATOR, ':', $key);
 	}
 
 
@@ -312,7 +313,7 @@ final class RedisStorage implements Storage
 	 */
 	private static function processStoredValue(string $key, string $storedValue): array
 	{
-		[$meta, $data] = explode(Cache::NAMESPACE_SEPARATOR, $storedValue, 2) + [null, null];
+		[$meta, $data] = explode(self::NS_SEPARATOR, $storedValue, 2) + [null, null];
 		return [[self::KEY => $key] + json_decode((string) $meta, true), $data];
 	}
 
