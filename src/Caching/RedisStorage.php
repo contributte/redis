@@ -159,7 +159,7 @@ final class RedisStorage implements Storage
 		}
 
 		$data = $this->serializer->serialize($data, $meta);
-		$store = json_encode($meta) . Cache::NAMESPACE_SEPARATOR . $data;
+		$store = json_encode($meta) . Cache::NamespaceSeparator . $data;
 
 		try {
 			if (isset($dependencies[Cache::EXPIRATION])) {
@@ -209,7 +209,7 @@ final class RedisStorage implements Storage
 
 	private function formatEntryKey(string $key): string
 	{
-		return self::NS_NETTE . ':' . str_replace(Cache::NAMESPACE_SEPARATOR, ':', $key);
+		return self::NS_NETTE . ':' . str_replace(Cache::NamespaceSeparator, ':', $key);
 	}
 
 
@@ -312,7 +312,7 @@ final class RedisStorage implements Storage
 	 */
 	private static function processStoredValue(string $key, string $storedValue): array
 	{
-		[$meta, $data] = explode(Cache::NAMESPACE_SEPARATOR, $storedValue, 2) + [null, null];
+		[$meta, $data] = explode(Cache::NamespaceSeparator, $storedValue, 2) + [null, null];
 		return [[self::KEY => $key] + json_decode((string) $meta, true), $data];
 	}
 
