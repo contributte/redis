@@ -23,6 +23,7 @@ final class RedisExtension24 extends CompilerExtension
 		'debug' => false,
 		'serializer' => null,
 		'connection' => [],
+		'clientFactory' => Client::class,
 	];
 
 	/** @var mixed[] */
@@ -54,8 +55,8 @@ final class RedisExtension24 extends CompilerExtension
 			$connection = $this->validateConfig($this->connectionDefaults, $connection, $this->prefix('connection.' . $name));
 
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
-				->setType(Client::class)
-				->setArguments([$connection['uri'], $connection['options']])
+				->setType(ClientInterface::class)
+				->setFactory($config['clientFactory'], [$connection['uri'], $connection['options']])
 				->setAutowired($autowired);
 
 			$connections[] = [

@@ -4,7 +4,7 @@ namespace Contributte\Redis\Caching;
 
 use Nette\Caching\Cache;
 use Nette\Caching\Storages\IJournal as Journal;
-use Predis\Client;
+use Predis\ClientInterface;
 
 /**
  * @see based on original https://github.com/Kdyby/Redis
@@ -18,13 +18,10 @@ final class RedisJournal implements Journal
 	private const TAGS = 'tags';
 	private const KEYS = 'keys';
 
-	/** @var Client<mixed> */
+	/** @var ClientInterface $client */
 	private $client;
 
-	/**
-	 * @param Client<mixed> $client
-	 */
-	public function __construct(Client $client)
+	public function __construct(ClientInterface $client)
 	{
 		$this->client = $client;
 	}

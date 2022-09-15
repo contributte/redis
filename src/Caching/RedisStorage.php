@@ -8,7 +8,7 @@ use Nette\Caching\Cache;
 use Nette\Caching\IStorage as Storage;
 use Nette\Caching\Storages\IJournal as Journal;
 use Nette\InvalidStateException;
-use Predis\Client;
+use Predis\ClientInterface;
 use Predis\PredisException;
 
 /**
@@ -27,7 +27,7 @@ final class RedisStorage implements Storage
 	private const META_CALLBACKS = 'callbacks'; // array of callbacks (function, args)
 	private const KEY = 'key'; // additional cache structure
 
-	/** @var Client<mixed> $client */
+	/** @var ClientInterface $client */
 	private $client;
 
 	/** @var Journal|null $journal */
@@ -37,11 +37,11 @@ final class RedisStorage implements Storage
 	private $serializer;
 
 	/**
-	 * @param Client<mixed> $client
+	 * @param ClientInterface $client
 	 * @param Journal|null $journal
 	 * @param Serializer|null $serializer
 	 */
-	public function __construct(Client $client, ?Journal $journal = null, ?Serializer $serializer = null)
+	public function __construct(ClientInterface $client, ?Journal $journal = null, ?Serializer $serializer = null)
 	{
 		$this->client = $client;
 		$this->journal = $journal;
@@ -53,10 +53,7 @@ final class RedisStorage implements Storage
 		$this->serializer = $serializer;
 	}
 
-	/**
-	 * @return Client<mixed>
-	 */
-	public function getClient(): Client
+	public function getClient(): ClientInterface
 	{
 		return $this->client;
 	}
