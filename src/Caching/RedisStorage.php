@@ -295,7 +295,7 @@ final class RedisStorage implements Storage
 		$formattedKeys = array_map([$this, 'formatEntryKey'], $keys);
 
 		$result = [];
-		foreach ($this->client->mget([$formattedKeys]) as $index => $stored) {
+		foreach ($this->client->mget($formattedKeys) as $index => $stored) {
 			$key = $keys[$index];
 			$result[$key] = $stored !== false ? self::processStoredValue($key, $stored) : null;
 		}
