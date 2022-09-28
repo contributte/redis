@@ -4,6 +4,11 @@ includes:
 	- vendor/phpstan/phpstan-nette/rules.neon
 
 parameters:
+	level: 8
+
+	paths:
+		- src
+
 	excludePaths:
 		- src/DI/RedisExtension24.php
 
