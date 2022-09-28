@@ -11,6 +11,7 @@ use Nette\DI\Compiler;
 use Ninjify\Nunjuck\Toolkit;
 use Predis\Client;
 use Tester\Assert;
+use Tests\Fixtures\DummyRedisClient;
 use Tests\Toolkit\Container;
 use Tests\Toolkit\Helpers;
 use Tests\Toolkit\Liberator;
@@ -165,9 +166,6 @@ Toolkit::test(function (): void {
 	Assert::equal(1234, $parameters['port']);
 });
 
-// phpcs:ignore
-class RedisClient extends Client {}
-
 // Client factory
 Toolkit::test(function (): void {
 	$container = Container::of()
@@ -176,7 +174,7 @@ Toolkit::test(function (): void {
 			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
 			$compiler->addConfig(Helpers::neon('
 				redis:
-					clientFactory: Tests\Cases\DI\RedisClient
+					clientFactory: Tests\Fixtures\DummyRedisClient
 					connection:
 						default:
 							uri: tcp://127.0.0.1:1111
@@ -187,5 +185,5 @@ Toolkit::test(function (): void {
 
 	$client = $container->getService('redis.connection.default.client');
 
-	Assert::type(RedisClient::class, $client);
+	Assert::type(DummyRedisClient::class, $client);
 });
