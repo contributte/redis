@@ -26,6 +26,9 @@ redis:
 	# Setup Tracy panel
 	debug: %debugMode%
 
+	# Default client factory
+	clientFactory: Predis\Client
+
 	connection:
 		default:
 			uri: tcp://127.0.0.1:6379
@@ -75,7 +78,7 @@ redis:
 			storage: true
 
 services:
-    customSerializer: App\Serializers\YourSerializer
+	customSerializer: App\Serializers\YourSerializer
 ```
 
 This package provides several serializers:
@@ -105,6 +108,7 @@ redis:
 
 When using sessions and cache make sure you use **2 different databases**. One for cache and one for sessions. In case you will use only 1 database for both **you will loose sessions when clearing cache.**
 This would be preferred config:
+
 ```neon
 connection:
 	default:
