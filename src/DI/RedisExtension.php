@@ -14,6 +14,7 @@ use Nette\PhpGenerator\ClassType;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 use Predis\Client;
+use Predis\ClientInterface;
 use Predis\Session\Handler;
 use RuntimeException;
 use stdClass;
@@ -38,6 +39,7 @@ final class RedisExtension extends CompilerExtension
 					Expect::array()
 				)->default(false),
 			])),
+			'clientFactory' => Expect::string(Client::class),
 		]);
 	}
 
@@ -52,8 +54,8 @@ final class RedisExtension extends CompilerExtension
 			$autowired = $name === 'default';
 
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
-				->setType(Client::class)
-				->setArguments([$connection->uri, $connection->options])
+				->setType(ClientInterface::class)
+				->setFactory($config->clientFactory, [$connection->uri, $connection->options])
 				->setAutowired($autowired);
 
 			$connections[] = [

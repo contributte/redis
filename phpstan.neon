@@ -8,5 +8,37 @@ parameters:
 		- src/DI/RedisExtension24.php
 
 	ignoreErrors:
-		- '#Function snappy_(.+) not found.#'
 		- "#^Do\\-while loop condition is always false\\.$#"
+
+		# backward compatibility with nette/caching < 3.1
+		-
+			message: """
+				#^Class Contributte\\\\Redis\\\\Caching\\\\RedisJournal implements deprecated interface Nette\\\\Caching\\\\Storages\\\\IJournal\\:
+				use Nette\\\\Caching\\\\Storages\\\\Journal$#
+			"""
+			count: 1
+			path: src/Caching/RedisJournal.php
+
+		-
+			message: """
+				#^Class Contributte\\\\Redis\\\\Caching\\\\RedisStorage implements deprecated interface Nette\\\\Caching\\\\IStorage\\:
+				use Nette\\\\Caching\\\\Storage$#
+			"""
+			count: 1
+			path: src/Caching/RedisStorage.php
+
+		-
+			message: """
+				#^Parameter \\$journal of method Contributte\\\\Redis\\\\Caching\\\\RedisStorage\\:\\:__construct\\(\\) has typehint with deprecated interface Nette\\\\Caching\\\\Storages\\\\IJournal\\:
+				use Nette\\\\Caching\\\\Storages\\\\Journal$#
+			"""
+			count: 1
+			path: src/Caching/RedisStorage.php
+
+		-
+			message: """
+				#^Fetching class constant class of deprecated class Nette\\\\Caching\\\\IStorage\\:
+				use Nette\\\\Caching\\\\Storage$#
+			"""
+			count: 3
+			path: src/DI/RedisExtension.php

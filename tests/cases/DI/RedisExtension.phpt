@@ -164,3 +164,28 @@ Toolkit::test(function (): void {
 	Assert::equal('1.2.3.4', $parameters['host']);
 	Assert::equal(1234, $parameters['port']);
 });
+
+// phpcs:ignore
+class RedisClient extends Client {}
+
+// Client factory
+Toolkit::test(function (): void {
+	$container = Container::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
+			$compiler->addConfig(Helpers::neon('
+				redis:
+					clientFactory: Tests\Cases\DI\RedisClient
+					connection:
+						default:
+							uri: tcp://127.0.0.1:1111
+							storage: true
+			'));
+		})
+		->build();
+
+	$client = $container->getService('redis.connection.default.client');
+
+	Assert::type(RedisClient::class, $client);
+});
