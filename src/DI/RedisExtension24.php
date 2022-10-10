@@ -12,6 +12,7 @@ use Nette\Http\Session;
 use Nette\PhpGenerator\ClassType;
 use Nette\Utils\Validators;
 use Predis\Client;
+use Predis\ClientInterface;
 use Predis\Session\Handler;
 use RuntimeException;
 
