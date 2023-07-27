@@ -33,6 +33,7 @@ final class RedisExtension extends CompilerExtension
 			'connection' => Expect::arrayOf(Expect::structure([
 				'uri' => Expect::anyOf(Expect::string(), Expect::listOf(Expect::string()))->default('tcp://127.0.0.1:6379')->dynamic(),
 				'options' => Expect::array(),
+				'storageClass' => Expect::string()->default(RedisStorage::class),
 				'storage' => Expect::bool(false),
 				'sessions' => Expect::anyOf(
 					Expect::bool(),
@@ -107,7 +108,7 @@ final class RedisExtension extends CompilerExtension
 				->setAutowired(false);
 
 			$builder->addDefinition($this->prefix('connection.' . $name . '.storage'))
-				->setFactory(RedisStorage::class)
+				->setFactory($connection->storageClass)
 				->setArguments([
 					'client' => $builder->getDefinition($this->prefix('connection.' . $name . '.client')),
 					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . '.journal')),
