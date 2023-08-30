@@ -25,6 +25,12 @@ Toolkit::test(function (): void {
 				case 'DEL':
 					$storage->{$command->getArguments()[0]} = null;
 					return null;
+				case 'MGET':
+					$result = [];
+					foreach ($command->getArguments() as $index => $argument) {
+						$result[$index] = $storage->{$argument} ?? null;
+					}
+					return $result;
 				default:
 					return $storage->{$command->getArguments()[0]} ?? null;
 			}
@@ -41,4 +47,15 @@ Toolkit::test(function (): void {
 
 	$redis->write('false', false, []);
 	Assert::false($redis->read('false'));
+
+	$redis->write('text', 'abcd', []);
+	$redis->write('isValid', true, []);
+	$redis->write('data', null, []);
+	$redis->write('name', 'redis', []);
+	$data = $redis->multiRead(['text', 'isValid', 'data']);
+	Assert::count(3, $data);
+	Assert::same('abcd', $data['text']);
+	Assert::true($data['isValid']);
+	Assert::null($data['data']);
+	Assert::hasNotKey('name', $data);
 });
