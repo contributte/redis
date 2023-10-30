@@ -31,8 +31,10 @@ final class RedisExtension extends CompilerExtension
 			'debug' => Expect::bool(false),
 			'serializer' => Expect::anyOf(Expect::string()),
 			'connection' => Expect::arrayOf(Expect::structure([
+				'autowired' => Expect::bool(null),
 				'uri' => Expect::anyOf(Expect::string()->dynamic(), Expect::listOf(Expect::string()->dynamic()))->default('tcp://127.0.0.1:6379'),
 				'options' => Expect::array(),
+				'storageAutowired' => Expect::bool(null),
 				'storageClass' => Expect::string()->default(RedisStorage::class),
 				'storage' => Expect::bool(false),
 				'sessions' => Expect::anyOf(
@@ -52,7 +54,7 @@ final class RedisExtension extends CompilerExtension
 		$connections = [];
 
 		foreach ($config->connection as $name => $connection) {
-			$autowired = $name === 'default';
+			$autowired = $connection->autowired ?? ($name === 'default');
 
 			$client = $builder->addDefinition($this->prefix('connection.' . $name . '.client'))
 				->setType(ClientInterface::class)
@@ -86,7 +88,7 @@ final class RedisExtension extends CompilerExtension
 		$storages = 0;
 
 		foreach ($config->connection as $name => $connection) {
-			$autowired = $name === 'default';
+			$autowired = $connection->autowired ?? ($name === 'default');
 
 			// Skip if replacing storage is disabled
 			if (!$connection->storage) {
@@ -105,6 +107,9 @@ final class RedisExtension extends CompilerExtension
 
 			$builder->addDefinition($this->prefix('connection.' . $name . '.journal'))
 				->setFactory(RedisJournal::class)
+				->setArguments([
+					'client' => $builder->getDefinition($this->prefix('connection.' . $name . '.client')),
+				])
 				->setAutowired(false);
 
 			$builder->addDefinition($this->prefix('connection.' . $name . '.storage'))
@@ -114,7 +119,7 @@ final class RedisExtension extends CompilerExtension
 					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . '.journal')),
 					'serializer' => $config->serializer,
 				])
-				->setAutowired($autowired);
+				->setAutowired($connection->storageAutowired ?? $autowired);
 
 			$storages++;
 		}
