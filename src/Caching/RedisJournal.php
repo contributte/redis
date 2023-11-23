@@ -47,7 +47,7 @@ final class RedisJournal implements Journal
 		}
 
 		if (isset($dependencies[Cache::PRIORITY])) {
-			$this->client->zadd($this->formatKey(self::PRIORITY), $dependencies[Cache::PRIORITY]);
+			$this->client->zadd($this->formatKey(self::PRIORITY), [$key => $dependencies[Cache::PRIORITY]]);
 		}
 
 		$this->client->exec();

@@ -99,3 +99,33 @@ Toolkit::test(function () use ($cache): void {
 	sleep(2);
 	Assert::equal(null, $cache->load('foo'));
 });
+
+// Priority
+Toolkit::test(function () use ($cache): void {
+	$cache->save('foo1', 'bar1', [Cache::PRIORITY => 40]);
+	$cache->save('foo2', 'bar2', [Cache::PRIORITY => 30]);
+	$cache->save('foo3', 'bar3', [Cache::PRIORITY => 20]);
+	$cache->save('foo4', 'bar4', [Cache::PRIORITY => 10]);
+	Assert::same('bar1', $cache->load('foo1'));
+	Assert::same('bar2', $cache->load('foo2'));
+	Assert::same('bar3', $cache->load('foo3'));
+	Assert::same('bar4', $cache->load('foo4'));
+
+	$cache->clean([Cache::PRIORITY => 10]);
+	Assert::same('bar1', $cache->load('foo1'));
+	Assert::same('bar2', $cache->load('foo2'));
+	Assert::same('bar3', $cache->load('foo3'));
+	Assert::same(null, $cache->load('foo4'));
+
+	$cache->clean([Cache::PRIORITY => 30]);
+	Assert::same('bar1', $cache->load('foo1'));
+	Assert::same(null, $cache->load('foo2'));
+	Assert::same(null, $cache->load('foo3'));
+	Assert::same(null, $cache->load('foo4'));
+
+	$cache->clean([Cache::PRIORITY => 100]);
+	Assert::same(null, $cache->load('foo1'));
+	Assert::same(null, $cache->load('foo2'));
+	Assert::same(null, $cache->load('foo3'));
+	Assert::same(null, $cache->load('foo4'));
+});
