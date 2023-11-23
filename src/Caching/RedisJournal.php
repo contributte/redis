@@ -69,7 +69,7 @@ final class RedisJournal implements Journal
 			}
 
 			// drop tags of entry and priority, in case there are some
-			$this->client->del([$this->formatKey($key, self::TAGS), $this->formatKey($key, self::PRIORITY)]);
+			$this->client->del($this->formatKey($key, self::TAGS));
 			$this->client->zrem($this->formatKey(self::PRIORITY), $key);
 
 			$this->client->exec();
