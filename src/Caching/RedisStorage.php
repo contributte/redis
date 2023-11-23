@@ -17,7 +17,7 @@ use Predis\PredisException;
 final class RedisStorage implements Storage
 {
 
-	private const NS_NETTE = 'Contributte.Storage';
+	public const NS_PREFIX = 'Contributte.Storage';
 	private const NS_SEPARATOR = "\x00";
 
 	private const META_TIME = 'time'; // timestamp
@@ -211,7 +211,7 @@ final class RedisStorage implements Storage
 
 	private function formatEntryKey(string $key): string
 	{
-		return self::NS_NETTE . ':' . str_replace(self::NS_SEPARATOR, ':', $key);
+		return self::NS_PREFIX . ':' . str_replace(self::NS_SEPARATOR, ':', $key);
 	}
 
 
