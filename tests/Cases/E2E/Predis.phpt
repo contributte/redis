@@ -129,3 +129,35 @@ Toolkit::test(function () use ($cache): void {
 	Assert::same(null, $cache->load('foo3'));
 	Assert::same(null, $cache->load('foo4'));
 });
+
+// Helper function for journal related tests
+$generateJournalKey = static function (?string $storageKey, ?string $journalPart): string {
+	return ($storageKey ? 'Contributte.Journal:Contributte.Storage:' . $storageKey : 'Contributte.Journal') . ($journalPart ? ':' . $journalPart : null);
+};
+
+// Tags cleaning
+Toolkit::test(function () use ($storage, $client, $generateJournalKey): void {
+	$storage->clean([Cache::ALL => true]);
+	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+
+	$storage->write('foo', 'bar', [Cache::TAGS => ['tag']]);
+	Assert::same(1, $client->exists($generateJournalKey('foo', 'tags')));
+	Assert::same(1, $client->exists($generateJournalKey(null, 'tag:keys')));
+	$storage->clean([Cache::TAGS => ['tag']]);
+	Assert::same(0, $client->exists($generateJournalKey('foo', 'tags')));
+	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+
+	$storage->write('foo', 'bar', [Cache::TAGS => ['tag']]);
+	Assert::same(1, $client->exists($generateJournalKey('foo', 'tags')));
+	Assert::same(1, $client->exists($generateJournalKey(null, 'tag:keys')));
+	$storage->remove('foo');
+	Assert::same(0, $client->exists($generateJournalKey('foo', 'tags')));
+	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+
+	$storage->write('foo', 'bar', [Cache::TAGS => ['tag'], Cache::PRIORITY => 1]);
+	Assert::same(1, $client->exists($generateJournalKey('foo', 'tags')));
+	Assert::same(1, $client->exists($generateJournalKey(null, 'tag:keys')));
+	$storage->clean([Cache::PRIORITY => 1]);
+	Assert::same(0, $client->exists($generateJournalKey('foo', 'tags')));
+	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+});

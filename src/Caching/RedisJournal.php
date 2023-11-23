@@ -58,7 +58,7 @@ final class RedisJournal implements Journal
 	 *
 	 * @param mixed[]|string $keys
 	 */
-	private function cleanEntry($keys): void
+	public function cleanEntry($keys): void
 	{
 		foreach (is_array($keys) ? $keys : [$keys] as $key) {
 			$entries = $this->entryTags($key);
