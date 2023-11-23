@@ -131,33 +131,34 @@ Toolkit::test(function () use ($cache): void {
 });
 
 // Helper function for journal related tests
-$generateJournalKey = static function (?string $storageKey, ?string $journalPart): string {
-	return ($storageKey ? 'Contributte.Journal:Contributte.Storage:' . $storageKey : 'Contributte.Journal') . ($journalPart ? ':' . $journalPart : null);
+$generateJournalKey = static function (string $key, string $suffix, bool $addStoragePrefix): string {
+	$prefix = $addStoragePrefix ? sprintf('%s:%s', RedisJournal::NS_PREFIX, RedisStorage::NS_PREFIX) : RedisJournal::NS_PREFIX;
+	return sprintf('%s:%s:%s', $prefix, $key, $suffix);
 };
 
 // Tags cleaning
 Toolkit::test(function () use ($storage, $client, $generateJournalKey): void {
 	$storage->clean([Cache::ALL => true]);
-	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(0, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 
 	$storage->write('foo', 'bar', [Cache::TAGS => ['tag']]);
-	Assert::same(1, $client->exists($generateJournalKey('foo', 'tags')));
-	Assert::same(1, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(1, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(1, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 	$storage->clean([Cache::TAGS => ['tag']]);
-	Assert::same(0, $client->exists($generateJournalKey('foo', 'tags')));
-	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(0, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(0, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 
 	$storage->write('foo', 'bar', [Cache::TAGS => ['tag']]);
-	Assert::same(1, $client->exists($generateJournalKey('foo', 'tags')));
-	Assert::same(1, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(1, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(1, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 	$storage->remove('foo');
-	Assert::same(0, $client->exists($generateJournalKey('foo', 'tags')));
-	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(0, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(0, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 
 	$storage->write('foo', 'bar', [Cache::TAGS => ['tag'], Cache::PRIORITY => 1]);
-	Assert::same(1, $client->exists($generateJournalKey('foo', 'tags')));
-	Assert::same(1, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(1, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(1, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 	$storage->clean([Cache::PRIORITY => 1]);
-	Assert::same(0, $client->exists($generateJournalKey('foo', 'tags')));
-	Assert::same(0, $client->exists($generateJournalKey(null, 'tag:keys')));
+	Assert::same(0, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(0, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 });
