@@ -82,6 +82,10 @@ final class RedisStorage implements Storage
 	public function remove($key): void
 	{
 		$this->client->del([$this->formatEntryKey($key)]);
+
+		if ($this->journal instanceof RedisJournal) {
+			$this->journal->cleanEntry($this->formatEntryKey($key));
+		}
 	}
 
 	/**
