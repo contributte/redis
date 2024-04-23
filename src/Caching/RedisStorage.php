@@ -10,6 +10,7 @@ use Nette\Caching\Storages\IJournal as Journal;
 use Nette\InvalidStateException;
 use Predis\ClientInterface;
 use Predis\PredisException;
+use Predis\Response\Status;
 
 /**
  * @see based on original https://github.com/Kdyby/Redis
@@ -283,6 +284,10 @@ final class RedisStorage implements Storage
 	private function doRead(string $key): ?array
 	{
 		$stored = $this->client->get($this->formatEntryKey($key));
+		if ($stored instanceof Status && $stored->getPayload() === 'QUEUED') {
+			return null;
+		}
+
 		if (!$stored) {
 			return null;
 		}
