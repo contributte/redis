@@ -37,15 +37,28 @@ final class RedisJournal implements Journal
 
 		$this->client->multi();
 
+		$usedKeys = [];
+
 		// add entry to each tag & tag to entry
 		$tags = !isset($dependencies[Cache::Tags]) ? [] : (array) $dependencies[Cache::Tags];
 		foreach (array_unique($tags) as $tag) {
-			$this->client->sadd($this->formatKey($tag, self::SUFFIX_KEYS), [$key]);
-			$this->client->sadd($this->formatKey($key, self::SUFFIX_TAGS), [$tag]);
+			$usedKeys[] = $keySuffixKeys = $this->formatKey($tag, self::SUFFIX_KEYS);
+			$usedKeys[] = $keySuffixTags = $this->formatKey($key, self::SUFFIX_TAGS);
+
+			$this->client->sadd($keySuffixKeys, [$key]);
+			$this->client->sadd($keySuffixTags, [$tag]);
 		}
 
 		if (isset($dependencies[Cache::Priority])) {
-			$this->client->zadd($this->formatKey(self::KEY_PRIORITY), [$key => (int) $dependencies[Cache::Priority]]);
+			$usedKeys[] = $keyPriority = $this->formatKey(self::KEY_PRIORITY);
+
+			$this->client->zadd($keyPriority, [$key => (int) $dependencies[Cache::Priority]]);
+		}
+
+		if (isset($dependencies[Cache::Expire])) {
+			foreach ($usedKeys as $usedKey) {
+				$this->client->expire($usedKey, (int) $dependencies[Cache::Expire]);
+			}
 		}
 
 		$this->client->exec();
