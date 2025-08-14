@@ -24,6 +24,13 @@ try {
 	Environment::skip('Redis not found: ' . $e->getMessage());
 }
 
+// Helper function for journal related tests
+$generateJournalKey = static function (string $key, string $suffix, bool $addStoragePrefix): string {
+	$prefix = $addStoragePrefix ? sprintf('%s:%s', RedisJournal::NS_PREFIX, RedisStorage::NS_PREFIX) : RedisJournal::NS_PREFIX;
+
+	return sprintf('%s:%s:%s', $prefix, $key, $suffix);
+};
+
 // Basic
 Toolkit::test(function () use ($cache): void {
 	$cache->save('foo', 'bar');
@@ -93,11 +100,15 @@ Toolkit::test(function () use ($cache): void {
 });
 
 // Expiration
-Toolkit::test(function () use ($cache): void {
-	$cache->save('foo', 'bar', [Cache::EXPIRATION => 1]);
+Toolkit::test(function () use ($cache, $client, $generateJournalKey): void {
+	$cache->save('foo', 'bar', [Cache::EXPIRATION => 1, Cache::TAGS => ['tag']]);
 	Assert::same('bar', $cache->load('foo'));
+	Assert::same(1, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(1, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 	sleep(2);
 	Assert::equal(null, $cache->load('foo'));
+	Assert::same(0, $client->exists($generateJournalKey('foo', RedisJournal::SUFFIX_TAGS, true)));
+	Assert::same(0, $client->exists($generateJournalKey('tag', RedisJournal::SUFFIX_KEYS, false)));
 });
 
 // Priority
@@ -129,13 +140,6 @@ Toolkit::test(function () use ($cache): void {
 	Assert::same(null, $cache->load('foo3'));
 	Assert::same(null, $cache->load('foo4'));
 });
-
-// Helper function for journal related tests
-$generateJournalKey = static function (string $key, string $suffix, bool $addStoragePrefix): string {
-	$prefix = $addStoragePrefix ? sprintf('%s:%s', RedisJournal::NS_PREFIX, RedisStorage::NS_PREFIX) : RedisJournal::NS_PREFIX;
-
-	return sprintf('%s:%s:%s', $prefix, $key, $suffix);
-};
 
 // Tags cleaning
 Toolkit::test(function () use ($storage, $client, $generateJournalKey): void {
