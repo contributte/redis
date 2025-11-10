@@ -199,7 +199,7 @@ final class RedisStorage implements Storage
 		// cleaning using journal
 		if ($this->journal !== null) {
 			$keys = $this->journal->clean($conditions);
-			if ($keys !== null) {
+			if ($keys !== null && $keys !== []) {
 				$this->client->del($keys);
 			}
 		}
