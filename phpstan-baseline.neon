@@ -21,23 +21,11 @@ parameters:
 		-
 			message: '#^Casting to int something that''s already int\.$#'
 			identifier: cast.useless
-			count: 1
+			count: 2
 			path: src/Caching/RedisJournal.php
 
 		-
-			message: '#^Offset ''priority'' on array\{tags\: array\<string\>, priority\: int\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/Caching/RedisJournal.php
-
-		-
-			message: '#^Offset ''tags'' on array\{tags\: array\<string\>, priority\: int\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/Caching/RedisJournal.php
-
-		-
-			message: '#^Parameter \#2 \$dependencies \(array\{tags\: array\<string\>, priority\: int\}\) of method Contributte\\Redis\\Caching\\RedisJournal\:\:write\(\) should be contravariant with parameter \$dependencies \(array\) of method Nette\\Caching\\Storages\\Journal\:\:write\(\)$#'
+			message: '#^Parameter \#2 \$dependencies \(array\{tags\?\: array\<string\>, priority\?\: int, expire\?\: int\}\) of method Contributte\\Redis\\Caching\\RedisJournal\:\:write\(\) should be contravariant with parameter \$dependencies \(array\) of method Nette\\Caching\\Storages\\Journal\:\:write\(\)$#'
 			identifier: method.childParameterType
 			count: 1
 			path: src/Caching/RedisJournal.php
@@ -147,6 +135,12 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$meta of method Contributte\\Redis\\Serializer\\Serializer\:\:unserialize\(\) expects array\<mixed\>, mixed given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Caching/RedisStorage.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: offsetAccess.invalidOffset
 			count: 1
 			path: src/Caching/RedisStorage.php
 

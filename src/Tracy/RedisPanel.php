@@ -10,7 +10,7 @@ final class RedisPanel implements IBarPanel
 {
 
 	/** @var array<array{name: string, client: ClientInterface, uri: string|array<string>, options: array<mixed>}> */
-	private $connections;
+	private array $connections;
 
 	/**
 	 * @param array<array{name: string, client: ClientInterface, uri: string|array<string>, options: array<mixed>}> $connections

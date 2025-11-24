@@ -20,7 +20,7 @@ final class RedisExtension24 extends CompilerExtension
 {
 
 	/** @var mixed[] */
-	private $defaults = [
+	private array $defaults = [
 		'debug' => false,
 		'serializer' => null,
 		'connection' => [],
@@ -28,7 +28,7 @@ final class RedisExtension24 extends CompilerExtension
 	];
 
 	/** @var mixed[] */
-	private $connectionDefaults = [
+	private array $connectionDefaults = [
 		'uri' => 'tcp://127.0.0.1:6379',
 		'options' => [],
 		'storage' => false,
@@ -36,7 +36,7 @@ final class RedisExtension24 extends CompilerExtension
 	];
 
 	/** @var mixed[] */
-	private $sessionDefaults = [
+	private array $sessionDefaults = [
 		'ttl' => null,
 	];
 
