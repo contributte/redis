@@ -18,8 +18,7 @@ final class RedisJournal implements Journal
 	public const SUFFIX_TAGS = 'tags';
 	public const SUFFIX_KEYS = 'keys';
 
-	/** @var ClientInterface $client */
-	private $client;
+	private ClientInterface $client;
 
 	public function __construct(ClientInterface $client)
 	{
@@ -29,7 +28,7 @@ final class RedisJournal implements Journal
 	/**
 	 * Writes entry information into the journal.
 	 *
-	 * @param array{tags: string[], priority: int} $dependencies
+	 * @param array{tags?: string[], priority?: int, expire?: int} $dependencies
 	 */
 	public function write(string $key, array $dependencies): void
 	{
