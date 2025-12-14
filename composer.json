@@ -20,7 +20,7 @@
     "ext-json": "*",
     "php": ">=8.2",
     "nette/di": "^3.2.4",
-    "predis/predis": "^2.3.0"
+    "predis/predis": "^2.3.0 || ^3.0"
   },
   "suggest": {
     "ext-igbinary": "For Igbinary serialization",
