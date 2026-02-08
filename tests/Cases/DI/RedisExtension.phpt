@@ -5,6 +5,7 @@ namespace Tests\Cases\DI;
 use Contributte\Redis\Caching\RedisJournal;
 use Contributte\Redis\Caching\RedisStorage;
 use Contributte\Redis\DI\RedisExtension;
+use Contributte\Tester\Environment;
 use Contributte\Tester\Toolkit;
 use Contributte\Tester\Utils\ContainerBuilder;
 use Contributte\Tester\Utils\Liberator;
@@ -15,7 +16,6 @@ use Nette\DI\Compiler;
 use Predis\Client;
 use Tester\Assert;
 use Tests\Fixtures\DummyRedisClient;
-use Tests\Toolkit\Tests;
 
 require_once __DIR__ . '/../../bootstrap.php';
 
@@ -26,8 +26,8 @@ Toolkit::test(function (): void {
 			$compiler->addExtension('redis', new RedisExtension());
 			$compiler->addConfig([
 				'parameters' => [
-					'tempDir' => Tests::TEMP_PATH,
-					'appDir' => Tests::APP_PATH,
+					'tempDir' => Environment::getTestDir(),
+					'appDir' => Environment::getCwd(),
 				],
 			]);
 			$compiler->addConfig(Neonkit::load('
@@ -48,7 +48,7 @@ Toolkit::test(function (): void {
 	$container = ContainerBuilder::of()
 		->withCompiler(function (Compiler $compiler): void {
 			$compiler->addExtension('redis', new RedisExtension());
-			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
 			$compiler->addConfig(Neonkit::load('
 				redis:
 					connection:
@@ -69,7 +69,7 @@ Toolkit::test(function (): void {
 	$container = ContainerBuilder::of()
 		->withCompiler(function (Compiler $compiler): void {
 			$compiler->addExtension('redis', new RedisExtension());
-			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
 			$compiler->addConfig(Neonkit::load('
 				redis:
 					connection:
@@ -90,7 +90,7 @@ Toolkit::test(function (): void {
 	$container = ContainerBuilder::of()
 		->withCompiler(function (Compiler $compiler): void {
 			$compiler->addExtension('redis', new RedisExtension());
-			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
 			$compiler->addConfig(Neonkit::load('
 				redis:
 					connection:
@@ -116,7 +116,7 @@ Toolkit::test(function (): void {
 	$container = ContainerBuilder::of()
 		->withCompiler(function (Compiler $compiler): void {
 			$compiler->addExtension('redis', new RedisExtension());
-			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
 			$compiler->addConfig(Neonkit::load('
 				redis:
 					connection:
@@ -183,7 +183,7 @@ Toolkit::test(function (): void {
 	$container = ContainerBuilder::of()
 		->withCompiler(function (Compiler $compiler): void {
 			$compiler->addExtension('redis', new RedisExtension());
-			$compiler->addExtension('caching', new CacheExtension(Tests::TEMP_PATH));
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
 			$compiler->addConfig(Neonkit::load('
 				redis:
 					clientFactory: Tests\Fixtures\DummyRedisClient

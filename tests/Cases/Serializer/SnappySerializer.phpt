@@ -4,7 +4,7 @@
  * @phpExtension snappy
  */
 
-namespace Tests\Cases\Redis\Serializer;
+namespace Tests\Cases\Serializer;
 
 use Contributte\Redis\Serializer\SnappySerializer;
 use Contributte\Tester\Toolkit;
