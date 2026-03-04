@@ -40,6 +40,8 @@ final class RedisPanel implements IBarPanel
 		$connections = $this->connections;
 
 		foreach ($connections as $key => $connection) {
+			$connection['client']->disconnect();
+
 			$start = microtime(true);
 			try {
 				$connections[$key]['ping'] = $connection['client']->ping('ok');
