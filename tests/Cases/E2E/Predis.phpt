@@ -8,6 +8,7 @@ use Contributte\Tester\Toolkit;
 use Nette\Caching\Cache;
 use Predis\Client;
 use Predis\Connection\ConnectionException;
+use Throwable;
 use stdClass;
 use Tester\Assert;
 use Tester\Environment;
@@ -20,8 +21,12 @@ try {
 	$journal = new RedisJournal($client);
 	$storage = new RedisStorage($client, $journal);
 	$cache = new Cache($storage);
-} catch (ConnectionException $e) {
-	Environment::skip('Redis not found: ' . $e->getMessage());
+} catch (Throwable $e) {
+	if ($e instanceof ConnectionException || str_contains($e::class, 'StreamInitException') || str_contains($e::class, 'Connection')) {
+		Environment::skip('Redis not found: ' . $e->getMessage());
+	}
+
+	throw $e;
 }
 
 // Helper function for journal related tests

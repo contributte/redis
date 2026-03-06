@@ -15,8 +15,10 @@ require_once __DIR__ . '/../../bootstrap.php';
 Toolkit::test(function (): void {
 	$storage = (object) ['unserialized' => 'unserialized'];
 
-	$conn = Mockery::mock(ConnectionInterface::class)
-		->shouldReceive('executeCommand')
+	$conn = Mockery::mock(ConnectionInterface::class);
+	$conn->shouldReceive('getParameters')
+		->andReturn((object) ['database' => 0, 'protocol' => 2]);
+	$conn->shouldReceive('executeCommand')
 		->andReturnUsing(function (Command $command) use ($storage) {
 			switch ($command->getId()) {
 				case 'SET':
@@ -37,7 +39,7 @@ Toolkit::test(function (): void {
 				default:
 					return $storage->{$command->getArguments()[0]} ?? null;
 			}
-		})->getMock();
+		});
 
 	$redis = new RedisStorage(new Client($conn));
 	$redis->write('foo', 'bar', []);
