@@ -31,6 +31,11 @@ Redis client integration into Nette framework.
 
 - [Installation](#installation)
 - [Configuration](#configuration)
+  - [Sessions](#sessions)
+  - [Cache](#cache)
+  - [Custom serializer](#custom-serializer)
+  - [ENV variables](#env-variables)
+  - [Sessions and cache](#sessions-and-cache)
 
 ## Installation
 
@@ -40,8 +45,7 @@ composer require contributte/redis
 
 ```neon
 extensions:
-	redis: Contributte\Redis\DI\RedisExtension # For Nette 3+
-	redis: Contributte\Redis\DI\RedisExtension24 # For Nette 2.4
+	redis: Contributte\Redis\DI\RedisExtension
 ```
 
 ## Configuration
@@ -152,7 +156,7 @@ connection:
 
 See [how to contribute](https://contributte.org/contributing.html) to this package.
 
-This package is currently maintaining by these authors.
+This package is currently maintained by these authors.
 
 <a href="https://github.com/f3l1x">
   <img width="80" height="80" src="https://avatars2.githubusercontent.com/u/538058?v=3&s=80">
