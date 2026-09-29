@@ -64,6 +64,9 @@ redis:
 			storage: true
 ```
 
+Use `storageAutowired: true|false` to override autowiring of a connection's storage (defaults to the connection's `autowired`, which is `true` only for `default`).
+Nette's own storage stays autowired unless an autowired Redis storage replaces it.
+
 ### Custom serializer
 
 To use custom serializer for storage you need to implement `Contributte/Redis/Serializer/Serializer` interface.
