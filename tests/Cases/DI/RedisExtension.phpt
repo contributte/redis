@@ -12,6 +12,8 @@ use Contributte\Tester\Utils\Liberator;
 use Contributte\Tester\Utils\Neonkit;
 use Nette\Bridges\CacheDI\CacheExtension;
 use Nette\Caching\IStorage;
+use Nette\Caching\Storage;
+use Nette\Caching\Storages\FileStorage;
 use Nette\DI\Compiler;
 use Predis\Client;
 use Tester\Assert;
@@ -149,6 +151,114 @@ Toolkit::test(function (): void {
 
 	Assert::notSame(Liberator::of($storage1)->client, Liberator::of($storage2)->client);
 	Assert::notSame(Liberator::of($storage1)->journal, Liberator::of($storage2)->journal);
+});
+
+// Storage on non-default connection keeps original storage autowired
+Toolkit::test(function (): void {
+	$container = ContainerBuilder::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
+			$compiler->addConfig(Neonkit::load('
+				redis:
+					connection:
+						cache:
+							uri: tcp://127.0.0.1:1111
+							storage: true
+			'));
+		})
+		->build();
+
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.cache.storage'));
+	Assert::type(FileStorage::class, $container->getByType(Storage::class));
+});
+
+// Storage on default connection replaces original storage
+Toolkit::test(function (): void {
+	$container = ContainerBuilder::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
+			$compiler->addConfig(Neonkit::load('
+				redis:
+					connection:
+						default:
+							uri: tcp://127.0.0.1:1111
+							storage: true
+			'));
+		})
+		->build();
+
+	Assert::type(RedisStorage::class, $container->getByType(Storage::class));
+	Assert::same($container->getService('redis.connection.default.storage'), $container->getByType(Storage::class));
+});
+
+// Only second connection has autowired storage
+Toolkit::test(function (): void {
+	$container = ContainerBuilder::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
+			$compiler->addConfig(Neonkit::load('
+				redis:
+					connection:
+						first:
+							uri: tcp://127.0.0.1:1111
+							storage: true
+						second:
+							uri: tcp://127.0.0.2:2222
+							storage: true
+							storageAutowired: true
+			'));
+		})
+		->build();
+
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.first.storage'));
+	Assert::same($container->getService('redis.connection.second.storage'), $container->getByType(Storage::class));
+});
+
+// Storage on default connection with disabled storage autowiring keeps original storage autowired
+Toolkit::test(function (): void {
+	$container = ContainerBuilder::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
+			$compiler->addConfig(Neonkit::load('
+				redis:
+					connection:
+						default:
+							uri: tcp://127.0.0.1:1111
+							storage: true
+							storageAutowired: false
+			'));
+		})
+		->build();
+
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.default.storage'));
+	Assert::type(FileStorage::class, $container->getByType(Storage::class));
+});
+
+// Non-autowired storage listed before default connection
+Toolkit::test(function (): void {
+	$container = ContainerBuilder::of()
+		->withCompiler(function (Compiler $compiler): void {
+			$compiler->addExtension('redis', new RedisExtension());
+			$compiler->addExtension('caching', new CacheExtension(Environment::getTestDir()));
+			$compiler->addConfig(Neonkit::load('
+				redis:
+					connection:
+						second:
+							uri: tcp://127.0.0.2:2222
+							storage: true
+						default:
+							uri: tcp://127.0.0.1:1111
+							storage: true
+			'));
+		})
+		->build();
+
+	Assert::type(RedisStorage::class, $container->getService('redis.connection.second.storage'));
+	Assert::same($container->getService('redis.connection.default.storage'), $container->getByType(Storage::class));
 });
 
 // Dynamic parameters
