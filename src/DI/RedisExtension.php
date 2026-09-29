@@ -85,10 +85,12 @@ final class RedisExtension extends CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 		$config = $this->config;
-		$storages = 0;
+		$originalStorage = null;
+		$replaced = false;
 
 		foreach ($config->connection as $name => $connection) {
 			$autowired = $connection->autowired ?? ($name === 'default');
+			$storageAutowired = $connection->storageAutowired ?? $autowired;
 
 			// Skip if replacing storage is disabled
 			if (!$connection->storage) {
@@ -96,13 +98,18 @@ final class RedisExtension extends CompilerExtension
 			}
 
 			// Validate needed services
-			if ($builder->getByType(Storage::class) === null) {
-				throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', Storage::class));
+			if ($originalStorage === null) {
+				if ($builder->getByType(Storage::class) === null) {
+					throw new RuntimeException(sprintf('Please install nette/caching package. %s is required', Storage::class));
+				}
+
+				$originalStorage = $builder->getDefinitionByType(Storage::class);
 			}
 
-			if ($storages === 0) {
-				$builder->getDefinitionByType(Storage::class)
-					->setAutowired(false);
+			// Turn off autowiring of original storage only if it is replaced by autowired redis storage
+			if ($storageAutowired && !$replaced) {
+				$originalStorage->setAutowired(false);
+				$replaced = true;
 			}
 
 			$builder->addDefinition($this->prefix('connection.' . $name . '.journal'))
@@ -119,9 +126,7 @@ final class RedisExtension extends CompilerExtension
 					'journal' => $builder->getDefinition($this->prefix('connection.' . $name . '.journal')),
 					'serializer' => $config->serializer,
 				])
-				->setAutowired($connection->storageAutowired ?? $autowired);
-
-			$storages++;
+				->setAutowired($storageAutowired);
 		}
 	}
 
